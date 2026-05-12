@@ -30,8 +30,8 @@ input,select,button,textarea{font-family:inherit;}
 .nav-mgr .nbtn-ghost{background:rgba(0,0,0,.05);color:var(--text2);border:1px solid var(--border);}
 .nav-mgr .nbtn-ghost:hover{background:rgba(0,0,0,.09);color:var(--text);}
 .nav-mgr .nbtn-accent{background:var(--accent);color:#fff;}
-.nav-mgr .gear-btn{background:rgba(0,0,0,.05);border:1px solid var(--border);color:var(--muted);}
-.nav-mgr .gear-btn:hover{background:rgba(0,0,0,.09);color:var(--text);}
+.nav-mgr .gear-btn{background:rgba(0,0,0,.05);border:1px solid var(--border);color:var(--text2);width:32px;height:32px;border-radius:7px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .15s;font-weight:600;}
+.nav-mgr .gear-btn:hover{background:var(--bg);color:var(--accent);border-color:var(--accent);}
 .nav-mgr .bg-name{color:var(--text) !important;}
 .nav-mgr .bg-sub{color:var(--muted) !important;}
 .nav-right{display:flex;gap:8px;align-items:center;}
