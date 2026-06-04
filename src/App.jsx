@@ -189,7 +189,7 @@ const EVENT_COLORS=[
 function uid() { return Math.random().toString(36).slice(2,10); }
 
 // ─── STYLES ───
-const CSS = `@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&family=Fraunces:ital,opsz,wght@1,9..144,400&display=swap');
+const CSS = `@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&display=swap');
 
 
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -203,7 +203,7 @@ const CSS = `@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,
   --carbon-08:rgba(43,24,16,.08);--carbon-12:rgba(43,24,16,.12);--carbon-20:rgba(43,24,16,.20);
   --surface-nav:#EDE5D2;--surface-sidebar:#F6F1E8;--surface-feed:#FFFFFF;--dev-sidebar:#F2F0EA;
   --font-body:'DM Sans','Helvetica Neue',system-ui,sans-serif;
-  --font-serif:'Fraunces','Georgia',serif;
+  --font-serif:'DM Sans','Helvetica Neue',system-ui,sans-serif;
   /* Legacy aliases */
   --bg:#F5F2EC;--card:#FFFFFF;--nav:var(--surface-nav);
   --accent:var(--clay-500);--accent-dk:var(--clay-600);--accent-lt:var(--clay-50);
@@ -507,6 +507,69 @@ input,select,button,textarea{font-family:inherit;}
 .cal-month-chip{border-radius:4px;padding:2px 6px;margin-bottom:2px;cursor:pointer;font-size:10px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:all .12s;}
 .cal-month-chip:hover{opacity:.85;}
 
+/* ── SCHEDULE PAGE ── */
+.sch-layout{display:flex;flex-direction:row;height:calc(100vh - 52px);min-width:1000px;}
+.sch-sidebar{width:260px;min-width:260px;background:var(--masa-50);border-right:1px solid var(--carbon-08);padding:28px 22px;display:flex;flex-direction:column;gap:22px;overflow-y:auto;flex-shrink:0;}
+.sch-main{flex:1;min-width:0;padding:28px 32px;overflow-y:auto;background:var(--surface-feed);}
+.sch-eyebrow{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--clay-500);}
+.sch-heading{line-height:1.05;}
+.sch-month-name{font-size:40px;font-weight:800;letter-spacing:-.02em;color:var(--carbon-300);}
+.sch-year-name{font-family:var(--font-serif);font-size:40px;font-weight:700;color:var(--clay-500);}
+.sch-nav{display:flex;gap:5px;}
+.sch-nav-btn{flex:1;padding:7px 6px;border:1px solid var(--carbon-12);border-radius:7px;background:transparent;font-size:11px;font-weight:600;color:var(--carbon-200);cursor:pointer;transition:all .13s;white-space:nowrap;text-align:center;}
+.sch-nav-btn:hover{border-color:var(--clay-500);color:var(--clay-500);}
+.sch-nav-today{background:var(--clay-500);color:#fff !important;border-color:var(--clay-500) !important;}
+.sch-nav-today:hover{background:var(--clay-600);}
+.sch-section-label{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--carbon-50);margin-bottom:8px;}
+.sch-view-btns{display:flex;gap:4px;}
+.sch-view-btn{flex:1;padding:7px 8px;border:1px solid var(--carbon-12);border-radius:7px;background:transparent;font-size:12px;font-weight:600;color:var(--carbon-200);cursor:pointer;transition:all .13s;text-align:center;}
+.sch-view-btn.active{background:var(--carbon-300);color:#fff;border-color:var(--carbon-300);}
+.sch-view-btn:not(.active):hover{border-color:var(--carbon-20);color:var(--carbon-300);}
+.sch-status-pills{display:flex;flex-direction:column;gap:5px;}
+.sch-status-pill{padding:7px 12px;border-radius:7px;border:1px solid var(--carbon-12);background:transparent;font-size:11px;font-weight:600;color:var(--carbon-200);cursor:pointer;transition:all .13s;text-align:left;}
+.sch-status-pill:hover{border-color:var(--clay-500);color:var(--clay-500);}
+.sch-status-pill.active{background:var(--sol-100);color:var(--sol-700);border-color:var(--sol-400);}
+.sch-main-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;gap:16px;}
+.sch-main-title{font-size:32px;font-weight:800;letter-spacing:-.02em;color:var(--carbon-300);line-height:1;}
+.sch-main-sub{font-size:13px;color:var(--carbon-50);margin-top:5px;}
+.sch-search-wrap{position:relative;flex-shrink:0;}
+.sch-search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--carbon-50);}
+.sch-search{padding:10px 14px 10px 34px;border:1px solid var(--carbon-12);border-radius:8px;background:#fff;font-size:13px;font-family:var(--font-body);color:var(--carbon-300);outline:none;width:220px;}
+.sch-search:focus{border-color:var(--clay-500);}
+.sch-month-grid{display:grid;grid-template-columns:repeat(7,1fr);border:1px solid var(--carbon-08);border-radius:12px;overflow:hidden;background:#fff;}
+.sch-dow{padding:8px 10px;background:var(--masa-100);font-size:10px;font-weight:700;color:var(--carbon-50);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--carbon-08);border-right:1px solid var(--carbon-08);text-align:center;}
+.sch-dow:last-child{border-right:none;}
+.sch-cell{padding:6px 8px;min-height:100px;border-right:1px solid var(--carbon-08);border-bottom:1px solid var(--carbon-08);background:#fff;}
+.sch-cell:nth-child(7n){border-right:none;}
+.sch-cell-other{background:var(--masa-50);}
+.sch-cell-today{background:var(--clay-50);}
+.sch-cell-num{font-size:12px;font-weight:700;color:var(--carbon-300);margin-bottom:5px;display:flex;align-items:center;gap:6px;}
+.sch-today-badge{font-size:8px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:var(--clay-500);color:#fff;padding:2px 6px;border-radius:4px;}
+.sch-chip{border-left:3px solid;border-radius:4px;padding:4px 6px;margin-bottom:4px;cursor:pointer;transition:opacity .12s;}
+.sch-chip:hover{opacity:.75;}
+.sch-chip-time{font-size:9px;font-weight:800;letter-spacing:.04em;margin-bottom:1px;}
+.sch-chip-name{font-size:11px;font-weight:700;line-height:1.2;color:var(--carbon-300);}
+.sch-chip-guests{font-size:10px;color:var(--carbon-50);margin-top:1px;}
+.sch-chip-more{font-size:9px;color:var(--carbon-50);font-weight:600;margin-top:2px;padding-left:2px;}
+.sch-week-grid{display:grid;grid-template-columns:repeat(7,1fr);border:1px solid var(--carbon-08);border-radius:12px;overflow:hidden;background:#fff;}
+.sch-week-col{border-right:1px solid var(--carbon-08);padding:12px 8px;min-height:200px;}
+.sch-week-col:last-child{border-right:none;}
+.sch-week-col-today{background:var(--clay-50);}
+.sch-week-dow{font-size:10px;font-weight:700;color:var(--carbon-50);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;}
+.sch-week-num{font-size:24px;font-weight:800;color:var(--carbon-300);line-height:1;}
+.sch-week-num-today{color:var(--clay-500);}
+.sch-week-today-lbl{font-size:8px;color:var(--clay-500);font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-top:2px;margin-bottom:6px;}
+.sch-week-events{display:flex;flex-direction:column;gap:5px;margin-top:10px;}
+.sch-week-empty{font-size:11px;color:var(--carbon-08);padding-top:4px;}
+.sch-list{display:flex;flex-direction:column;border:1px solid var(--carbon-08);border-radius:12px;overflow:hidden;background:#fff;}
+.sch-list-empty{padding:28px;text-align:center;color:var(--carbon-50);font-size:13px;}
+.sch-list-row{display:grid;grid-template-columns:130px 1fr auto;gap:16px;align-items:center;padding:13px 20px;border-bottom:1px solid var(--carbon-08);border-left:4px solid transparent;cursor:pointer;transition:background .12s;}
+.sch-list-row:last-child{border-bottom:none;}
+.sch-list-row:hover{background:var(--masa-50);}
+.sch-list-date{font-size:12px;color:var(--carbon-50);font-weight:600;}
+.sch-list-name{font-size:14px;font-weight:700;color:var(--carbon-300);}
+.sch-list-meta{font-size:12px;color:var(--carbon-50);white-space:nowrap;}
+
 .past-events-tbl{width:100%;border-collapse:collapse;background:var(--card);border-radius:12px;overflow:hidden;border:1px solid var(--border);}
 .past-events-tbl th{background:var(--bg);padding:8px 14px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--border);}
 .past-events-tbl td{padding:11px 14px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle;}
@@ -613,7 +676,7 @@ input,select,button,textarea{font-family:inherit;}
 .dflex{display:flex;gap:7px;}
 
 /* MGR LAYOUT */
-.mgr-layout{display:grid;grid-template-columns:280px 1fr;gap:0;min-height:calc(100vh - 54px);min-width:1000px;}
+.mgr-layout{display:grid;grid-template-columns:260px 1fr;gap:0;min-height:calc(100vh - 54px);min-width:1000px;}
 .mgr-sidebar{background:#F8F7F5;padding:24px 0;border-right:1px solid #E0D8CE;}
 .mgr-nav-item{display:flex;align-items:center;padding:11px 20px;cursor:pointer;font-size:13px;font-weight:500;color:#4B5563;transition:all .13s;border-bottom:2px solid transparent;letter-spacing:.01em;}
 .mgr-nav-item:hover{background:#F0EDE8;color:#1C1208;}
@@ -844,18 +907,18 @@ select.ing-edit-inp{cursor:pointer;}
 
 /* ── DASHBOARD COCKPIT ── */
 .cockpit{display:flex;flex-direction:row;min-height:calc(100vh - 52px);width:100%;min-width:1000px;}
-.cockpit-sidebar{background:var(--surface-sidebar);padding:20px 12px;border-right:1px solid var(--carbon-08);display:flex;flex-direction:column;gap:12px;width:280px;min-width:280px;max-width:280px;flex-shrink:0;align-items:stretch;justify-content:flex-start;position:sticky;top:52px;height:calc(100vh - 52px);overflow-y:auto;overscroll-behavior:contain;}
+.cockpit-sidebar{background:var(--surface-sidebar);padding:20px 12px;border-right:1px solid var(--carbon-08);display:flex;flex-direction:column;gap:12px;width:260px;min-width:260px;max-width:260px;flex-shrink:0;align-items:stretch;justify-content:flex-start;position:sticky;top:52px;height:calc(100vh - 52px);overflow-y:auto;overscroll-behavior:contain;}
 .cockpit-feed{background:var(--surface-feed);padding:24px 30px;display:flex;flex-direction:column;flex:1;min-width:0;overflow:visible;}
 .greeting-eyebrow{font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--clay-500);}
 .greeting-head{font-size:38px;font-weight:700;letter-spacing:-.02em;line-height:.95;color:var(--carbon-300);margin-top:6px;}
-.greeting-accent{font-family:var(--font-serif);font-style:italic;font-weight:400;color:var(--clay-500);}
+.greeting-accent{font-family:var(--font-serif);font-weight:700;color:var(--clay-500);}
 .kpi-tile{background:#fff;border:1px solid var(--carbon-08);border-radius:8px;padding:10px 12px;position:relative;overflow:hidden;flex-shrink:0;}
 .kpi-tile-bar{position:absolute;left:0;top:0;bottom:0;width:4px;}
 .kpi-tile-inner{padding-left:10px;display:flex;justify-content:space-between;align-items:center;gap:10px;}
 .kpi-label{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--carbon-50);white-space:nowrap;}
 .kpi-sub{font-size:10px;color:var(--carbon-50);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .kpi-value{font-size:22px;font-weight:700;letter-spacing:-.02em;line-height:1;color:var(--carbon-300);}
-.sidebar-quote{margin-top:auto;font-size:11px;color:var(--carbon-50);font-family:var(--font-serif);font-style:italic;line-height:1.5;}
+.sidebar-quote{margin-top:auto;font-size:11px;color:var(--carbon-50);font-family:var(--font-serif);line-height:1.5;}
 .feed-filter-bar{display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap;}
 .feed-search-wrap{position:relative;flex:1;min-width:180px;}
 .feed-search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--carbon-50);}
@@ -884,11 +947,11 @@ select.ing-edit-inp{cursor:pointer;}
 @media print{.nav-new,.cockpit-sidebar{display:none;}}
 
 .wiz-layout{display:flex;flex-direction:row;width:100%;min-width:1000px;height:calc(100vh - 52px);overflow:hidden;}
-.wiz-rail{width:280px;min-width:280px;max-width:280px;background:var(--surface-sidebar);border-right:1px solid var(--carbon-08);padding:24px 22px;display:flex;flex-direction:column;gap:18px;flex-shrink:0;overflow-y:hidden;height:100%;}
+.wiz-rail{width:260px;min-width:260px;max-width:260px;background:var(--surface-sidebar);border-right:1px solid var(--carbon-08);padding:24px 22px;display:flex;flex-direction:column;gap:18px;flex-shrink:0;overflow-y:hidden;height:100%;}
 .wiz-main{flex:1;min-width:0;padding:32px 40px;overflow-y:auto;}
 .wiz-eyebrow{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--clay-500);}
 .wiz-heading{font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1;color:var(--carbon-300);margin-top:6px;}
-.wiz-heading em{font-family:var(--font-serif);font-style:italic;font-weight:400;color:var(--clay-500);}
+.wiz-heading em{font-family:var(--font-serif);font-weight:700;color:var(--clay-500);}
 .step-rail{display:flex;flex-direction:column;gap:8px;}
 .step-row{display:flex;align-items:flex-start;gap:12px;padding:10px 12px;border-radius:8px;}
 .step-row.current{background:#fff;border:1px solid var(--carbon-08);}
@@ -899,7 +962,7 @@ select.ing-edit-inp{cursor:pointer;}
 .step-label{font-size:13px;font-weight:600;color:var(--carbon-300);line-height:1.2;}
 .step-label.upcoming{color:var(--carbon-50);}
 .step-sub{font-size:11px;color:var(--carbon-50);margin-top:2px;}
-.wiz-footer{margin-top:auto;font-size:11px;font-family:var(--font-serif);font-style:italic;color:var(--carbon-50);line-height:1.5;}
+.wiz-footer{margin-top:auto;font-size:11px;font-family:var(--font-serif);color:var(--carbon-50);line-height:1.5;}
 .wiz-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:28px;}
 .wiz-hdr-left{}
 .wiz-step-eyebrow{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--clay-500);margin-bottom:6px;}
@@ -931,12 +994,12 @@ select.ing-edit-inp{cursor:pointer;}
 
 
 .ps-grid{display:flex;flex-direction:row;height:calc(100vh - 52px);min-width:1000px;overflow:hidden;}
-.ctx-rail{width:280px;min-width:280px;max-width:280px;background:var(--surface-sidebar);border-right:1px solid var(--carbon-08);padding:24px 18px;display:flex;flex-direction:column;gap:16px;height:100%;overflow-y:auto;flex-shrink:0;overscroll-behavior:contain;}
+.ctx-rail{width:260px;min-width:260px;max-width:260px;background:var(--surface-sidebar);border-right:1px solid var(--carbon-08);padding:24px 18px;display:flex;flex-direction:column;gap:16px;height:100%;overflow-y:auto;flex-shrink:0;overscroll-behavior:contain;}
 .ps-work{flex:1;min-width:0;padding:24px 28px;overflow-y:auto;overscroll-behavior:contain;}
 .ps-work>*{margin-bottom:14px;}.ps-work>*:last-child{margin-bottom:0;}
 .rail-eyebrow{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;margin-bottom:4px;}
 .rail-event-name{font-size:20px;font-weight:700;letter-spacing:-.01em;line-height:1.1;color:var(--carbon-300);}
-.rail-client{font-size:12px;font-family:var(--font-serif);font-style:italic;color:var(--carbon-50);margin-top:3px;}
+.rail-client{font-size:12px;font-family:var(--font-serif);color:var(--carbon-50);margin-top:3px;}
 .rail-progress-card{background:#fff;border:1px solid var(--carbon-08);border-radius:10px;padding:14px;}
 .rail-progress-nums{font-size:28px;font-weight:700;letter-spacing:-.02em;color:var(--carbon-300);line-height:1;}
 .rail-progress-denom{font-size:16px;font-weight:400;color:var(--carbon-50);}
@@ -968,7 +1031,7 @@ select.ing-edit-inp{cursor:pointer;}
 .ps-hdr-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;}
 .ps-event-eyebrow{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;margin-bottom:4px;}
 .ps-event-name{font-size:28px;font-weight:700;letter-spacing:-.02em;color:var(--carbon-300);line-height:1.1;}
-.ps-event-meta{font-size:13px;font-family:var(--font-serif);font-style:italic;color:var(--carbon-50);margin-top:4px;}
+.ps-event-meta{font-size:13px;font-family:var(--font-serif);color:var(--carbon-50);margin-top:4px;}
 .ps-stat-ribbon{display:flex;gap:0;border-top:1px solid var(--carbon-08);margin-top:14px;padding-top:14px;}
 .ps-stat{flex:1;text-align:center;border-right:1px solid var(--carbon-08);padding:0 8px;}
 .ps-stat:last-child{border-right:none;}
@@ -980,7 +1043,7 @@ select.ing-edit-inp{cursor:pointer;}
 .ps-meta-inp:focus{border-color:var(--clay-500);}
 .ps-notes-banner{background:#FFFBEB;border:2px solid var(--sol-400);border-radius:10px;padding:14px 18px;}
 .ps-notes-eyebrow{font-size:9px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--sol-700);margin-bottom:6px;}
-.ps-notes-ta{width:100%;border:none;background:transparent;font-size:14px;font-family:var(--font-serif);font-style:italic;color:var(--carbon-300);outline:none;resize:none;line-height:1.6;}
+.ps-notes-ta{width:100%;border:none;background:transparent;font-size:14px;font-family:var(--font-serif);color:var(--carbon-300);outline:none;resize:none;line-height:1.6;}
 .ps-notes-ta::placeholder{color:var(--sol-400);opacity:.7;}
 .ps-menu-bar{background:var(--cactus-50);border:1px solid var(--cactus-100);border-radius:10px;padding:12px 16px;}
 .ps-menu-eyebrow{font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--cactus-500);margin-bottom:8px;}
@@ -1106,7 +1169,7 @@ function ReviewScreen({event,selections,calcItems,ING,RECIPES,onGenerate,onSaveD
                   <span style={{fontSize:10,fontWeight:700,letterSpacing:".16em",textTransform:"uppercase",color:sc.ink}}>{daysLabel}</span>
                 </div>
                 <div style={{fontSize:26,fontWeight:700,letterSpacing:"-.02em",color:"var(--carbon-300)",lineHeight:1.1}}>{event.name||"Untitled event"}</div>
-                <div style={{fontSize:13,fontFamily:"var(--font-serif)",fontStyle:"italic",color:"var(--carbon-50)",marginTop:3}}>{event.truck||""}{event.guests?` · ${event.guests} guests`:""}</div>
+                <div style={{fontSize:13,fontFamily:"var(--font-serif)",color:"var(--carbon-50)",marginTop:3}}>{event.truck||""}{event.guests?` · ${event.guests} guests`:""}</div>
               </div>
               <button className="btn btn-secondary btn-sm" onClick={onEditDetails}>Edit details</button>
             </div>
@@ -1145,7 +1208,7 @@ function ReviewScreen({event,selections,calcItems,ING,RECIPES,onGenerate,onSaveD
               <div style={{fontSize:10,fontWeight:700,letterSpacing:".16em",textTransform:"uppercase",color:"var(--carbon-50)"}}>
                 Generated prep list · {calcItems?.length||0} ingredients
               </div>
-              <div style={{fontSize:12,fontFamily:"var(--font-serif)",fontStyle:"italic",color:"var(--carbon-50)",marginTop:3}}>
+              <div style={{fontSize:12,fontFamily:"var(--font-serif)",color:"var(--carbon-50)",marginTop:3}}>
                 auto-merged from {selections.length} dish{selections.length!==1?"es":""}
               </div>
             </div>
@@ -1175,7 +1238,7 @@ function ReviewScreen({event,selections,calcItems,ING,RECIPES,onGenerate,onSaveD
               <div className="allergy-icon">!</div>
               <div>
                 <div style={{fontSize:10,fontWeight:700,letterSpacing:".16em",textTransform:"uppercase",color:"var(--sol-700)",marginBottom:6}}>Notes & allergy alerts · carried to the prep sheet</div>
-                <div style={{fontSize:15,fontFamily:"var(--font-serif)",fontStyle:"italic",color:"var(--carbon-300)",lineHeight:1.5}}>{event.notes}</div>
+                <div style={{fontSize:15,fontFamily:"var(--font-serif)",color:"var(--carbon-300)",lineHeight:1.5}}>{event.notes}</div>
               </div>
             </div>
             <label style={{display:"flex",alignItems:"center",gap:10,cursor:"pointer",fontSize:13,fontWeight:600,color:"var(--sol-700)"}}>
@@ -1203,181 +1266,195 @@ function ReviewScreen({event,selections,calcItems,ING,RECIPES,onGenerate,onSaveD
 
 // ─── CALENDAR VIEW ───
 function CalendarView({events,onSelect}){
-  const [calView,setCalView]=useState("week");
-  const [anchor,setAnchor]=useState(()=>{
-    const d=new Date();d.setHours(0,0,0,0);return d;
-  });
+  const [calView,setCalView]=useState("month");
+  const [anchor,setAnchor]=useState(()=>{const d=new Date();d.setHours(0,0,0,0);return d;});
+  const [statusFilter,setStatusFilter]=useState([]);
+  const [search,setSearch]=useState("");
 
   const fmtTime=t=>{if(!t)return"";const[h,m]=t.split(":");const hr=parseInt(h,10);return`${hr%12||12}:${m===undefined?"00":m}${hr>=12?"P":"A"}`;};
   const isSameDay=(a,b)=>a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();
   const evDate=ev=>ev.date?new Date(ev.date+"T00:00:00"):null;
+  const today=new Date();today.setHours(0,0,0,0);
   const activeEvents=events.filter(ev=>!ev.archived&&!ev.deleted);
 
-  const statusLabel={prep:"IN PREP",loaded:"LOADED",returned:"RETURNED",pending:"PENDING",done:"PREPPED"};
   const getStatus=ev=>{
     if(!ev.items.length)return"pending";
     if(ev.items.some(i=>parseFloat(i.returned)>=0&&i.returned!==""))return"returned";
     if(ev.items.some(i=>parseFloat(i.loaded)>0))return"loaded";
-    if(ev.items.filter(i=>i.prepped?.trim()).length>0)return"prep";
+    const preppedCount=ev.items.filter(i=>i.prepped?.trim()).length;
+    if(preppedCount===ev.items.length&&preppedCount>0)return"prepped";
+    if(preppedCount>0)return"prep";
     return"pending";
   };
 
-  // ── WEEK VIEW ──
-  const weekStart=()=>{
-    const d=new Date(anchor);
-    const dow=d.getDay();
-    const diff=dow===0?-6:1-dow;
-    d.setDate(d.getDate()+diff);
-    return d;
-  };
+  const prevMonth=()=>{const d=new Date(anchor);d.setDate(1);d.setMonth(d.getMonth()-1);setAnchor(d);};
+  const nextMonth=()=>{const d=new Date(anchor);d.setDate(1);d.setMonth(d.getMonth()+1);setAnchor(d);};
   const prevWeek=()=>{const d=new Date(anchor);d.setDate(d.getDate()-7);setAnchor(d);};
   const nextWeek=()=>{const d=new Date(anchor);d.setDate(d.getDate()+7);setAnchor(d);};
   const goToday=()=>{const d=new Date();d.setHours(0,0,0,0);setAnchor(d);};
 
-  const weekDays=()=>{
-    const start=weekStart();
-    return Array.from({length:7},(_,i)=>{const d=new Date(start);d.setDate(d.getDate()+i);return d;});
-  };
-
-  const weekLabel=()=>{
-    const days=weekDays();
-    const s=days[0];const e=days[6];
-    const mo=s.toLocaleDateString("en-US",{month:"long"});
-    const mo2=e.toLocaleDateString("en-US",{month:"long"});
-    const yr=s.getFullYear();
-    if(mo===mo2)return`${mo} ${s.getDate()}–${e.getDate()}, ${yr}`;
-    return`${mo} ${s.getDate()} – ${mo2} ${e.getDate()}, ${yr}`;
-  };
-
-  const weekNum=()=>{
-    const d=new Date(weekStart());
-    const jan1=new Date(d.getFullYear(),0,1);
-    return Math.ceil(((d-jan1)/86400000+jan1.getDay()+1)/7);
-  };
-
-  const today=new Date();today.setHours(0,0,0,0);
-  const DAYS=["MON","TUE","WED","THU","FRI","SAT","SUN"];
-
-  // ── MONTH VIEW ──
-  const prevMonth=()=>{const d=new Date(anchor);d.setDate(1);d.setMonth(d.getMonth()-1);setAnchor(d);};
-  const nextMonth=()=>{const d=new Date(anchor);d.setDate(1);d.setMonth(d.getMonth()+1);setAnchor(d);};
+  const monthLabel=()=>anchor.toLocaleDateString("en-US",{month:"long"});
+  const yearLabel=()=>anchor.getFullYear();
+  const adjMonthLabel=delta=>{const d=new Date(anchor);d.setDate(1);d.setMonth(d.getMonth()+delta);return d.toLocaleDateString("en-US",{month:"short"});};
 
   const monthDays=()=>{
     const year=anchor.getFullYear();const month=anchor.getMonth();
     const first=new Date(year,month,1);const last=new Date(year,month+1,0);
     const startDow=first.getDay();
-    const offset=startDow===0?6:startDow-1;
     const days=[];
-    for(let i=offset;i>0;i--){const d=new Date(first);d.setDate(d.getDate()-i);days.push({date:d,cur:false});}
+    for(let i=startDow;i>0;i--){const d=new Date(first);d.setDate(d.getDate()-i);days.push({date:d,cur:false});}
     for(let i=1;i<=last.getDate();i++)days.push({date:new Date(year,month,i),cur:true});
     const rem=42-days.length;
     for(let i=1;i<=rem;i++){const d=new Date(last);d.setDate(d.getDate()+i);days.push({date:d,cur:false});}
     return days;
   };
 
-  const monthLabel=()=>anchor.toLocaleDateString("en-US",{month:"long",year:"numeric"});
+  const weekStart=()=>{const d=new Date(anchor);d.setDate(d.getDate()-d.getDay());return d;};
+  const weekDays=()=>Array.from({length:7},(_,i)=>{const d=new Date(weekStart());d.setDate(d.getDate()+i);return d;});
 
-  const evColor=ev=>ev.color||"var(--accent)";
-  const textColor=(bg)=>{
-    if(!bg||bg.startsWith("var"))return"#fff";
-    const hex=bg.replace("#","");
-    const r=parseInt(hex.substr(0,2),16);const g=parseInt(hex.substr(2,2),16);const b=parseInt(hex.substr(4,2),16);
-    return(r*0.299+g*0.587+b*0.114)>140?"#1A1208":"#fff";
-  };
-  const lightTint=(hex,opacity=0.15)=>{
-    if(!hex||hex.startsWith("var"))return"rgba(196,80,42,0.12)";
-    const h=hex.replace("#","");
-    const r=parseInt(h.substr(0,2),16);const g=parseInt(h.substr(2,2),16);const b=parseInt(h.substr(4,2),16);
-    return`rgba(${r},${g},${b},${opacity})`;
+  const sticker=ev=>STICKER[ev.color]||STICKER.orange;
+
+  const filteredEvents=activeEvents.filter(ev=>{
+    if(search&&!ev.name?.toLowerCase().includes(search.toLowerCase()))return false;
+    if(statusFilter.length&&!statusFilter.includes(getStatus(ev)))return false;
+    return true;
+  });
+
+  const monthEvs=activeEvents.filter(ev=>{const d=evDate(ev);return d&&d.getMonth()===anchor.getMonth()&&d.getFullYear()===anchor.getFullYear();});
+  const upcoming=monthEvs.filter(ev=>{const d=evDate(ev);return d&&d>=today;}).length;
+  const wrapped=monthEvs.filter(ev=>{const d=evDate(ev);return d&&d<today;}).length;
+
+  const toggleStatus=s=>setStatusFilter(prev=>prev.includes(s)?prev.filter(x=>x!==s):[...prev,s]);
+
+  const Chip=({ev})=>{
+    const stk=sticker(ev);
+    return(
+      <div className="sch-chip" style={{background:stk.soft,borderLeftColor:stk.bar}} onClick={()=>onSelect(ev.id)}>
+        {ev.startTime&&<div className="sch-chip-time" style={{color:stk.ink}}>{fmtTime(ev.startTime)}</div>}
+        <div className="sch-chip-name">{ev.name}</div>
+        {ev.guests&&<div className="sch-chip-guests">{ev.guests} guests</div>}
+      </div>
+    );
   };
 
   return(
-    <div className="cal-wrap">
-      {/* HEADER */}
-      <div className="cal-header">
+    <div className="sch-layout">
+      {/* SIDEBAR */}
+      <aside className="sch-sidebar">
+        <div className="sch-eyebrow">Schedule</div>
+        <div className="sch-heading">
+          <div className="sch-month-name">{monthLabel()}</div>
+          <div className="sch-year-name">{yearLabel()}.</div>
+        </div>
+
+        <div className="sch-nav">
+          <button className="sch-nav-btn" onClick={calView==="week"?prevWeek:prevMonth}>‹ {adjMonthLabel(-1)}</button>
+          <button className="sch-nav-btn sch-nav-today" onClick={goToday}>{new Date().toLocaleDateString("en-US",{month:"short"})}</button>
+          <button className="sch-nav-btn" onClick={calView==="week"?nextWeek:nextMonth}>{adjMonthLabel(1)} ›</button>
+        </div>
+
         <div>
-          {calView==="week"&&<div className="cal-title-week">WEEK {weekNum()} · {weekDays()[0].toLocaleDateString("en-US",{month:"short",day:"numeric"}).toUpperCase()} – {weekDays()[6].toLocaleDateString("en-US",{month:"short",day:"numeric"}).toUpperCase()}, {weekDays()[0].getFullYear()}</div>}
-          {calView==="month"&&<div className="cal-title-week">{anchor.toLocaleDateString("en-US",{year:"numeric"})}</div>}
-          <div className="cal-title">
-            {calView==="week"&&"THIS WEEK'S BOARD."}
-            {calView==="month"&&monthLabel().toUpperCase().split(" ")[0]+"."}
+          <div className="sch-section-label">View</div>
+          <div className="sch-view-btns">
+            {["month","week","list"].map(v=>(
+              <button key={v} className={`sch-view-btn ${calView===v?"active":""}`} onClick={()=>setCalView(v)}>
+                {v.charAt(0).toUpperCase()+v.slice(1)}
+              </button>
+            ))}
           </div>
         </div>
-        <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap",justifyContent:"flex-end"}}>
-          <div className="cal-view-toggle">
-            <button className={`cal-view-btn ${calView==="month"?"active":""}`} onClick={()=>setCalView("month")}>Month</button>
-            <button className={`cal-view-btn ${calView==="week"?"active":""}`} onClick={()=>setCalView("week")}>Week</button>
-          </div>
-          <div className="cal-nav">
-            <button className="cal-nav-btn" onClick={calView==="week"?prevWeek:prevMonth}>‹</button>
-            <button className="cal-today-btn" onClick={goToday}>{calView==="week"?"This week":"This month"}</button>
-            <button className="cal-nav-btn" onClick={calView==="week"?nextWeek:nextMonth}>›</button>
+
+        <div>
+          <div className="sch-section-label">Status</div>
+          <div className="sch-status-pills">
+            {[{key:"prep",label:"In Prep"},{key:"prepped",label:"Prepped"},{key:"loaded",label:"Loaded"},{key:"returned",label:"Returned"}].map(s=>(
+              <button key={s.key} className={`sch-status-pill ${statusFilter.includes(s.key)?"active":""}`} onClick={()=>toggleStatus(s.key)}>
+                {s.label}
+              </button>
+            ))}
           </div>
         </div>
+      </aside>
+
+      {/* MAIN */}
+      <div className="sch-main">
+        <div className="sch-main-hdr">
+          <div>
+            <div className="sch-main-title">{monthLabel()} {yearLabel()}</div>
+            <div className="sch-main-sub">{upcoming} upcoming · {wrapped} wrapped this month</div>
+          </div>
+          <div className="sch-search-wrap">
+            <span className="sch-search-icon">⌕</span>
+            <input className="sch-search" placeholder="Search events…" value={search} onChange={e=>setSearch(e.target.value)}/>
+          </div>
+        </div>
+
+        {/* MONTH VIEW */}
+        {calView==="month"&&(
+          <div className="sch-month-grid">
+            {["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(d=>(
+              <div key={d} className="sch-dow">{d}</div>
+            ))}
+            {monthDays().map(({date,cur},i)=>{
+              const isToday=isSameDay(date,today);
+              const dayEvs=filteredEvents.filter(ev=>{const d=evDate(ev);return d&&isSameDay(d,date);}).sort((a,b)=>(a.startTime||"").localeCompare(b.startTime||""));
+              return(
+                <div key={i} className={`sch-cell ${!cur?"sch-cell-other":""} ${isToday?"sch-cell-today":""}`}>
+                  <div className="sch-cell-num">
+                    {date.getDate()}
+                    {isToday&&<span className="sch-today-badge">Today</span>}
+                  </div>
+                  {dayEvs.slice(0,3).map(ev=><Chip key={ev.id} ev={ev}/>)}
+                  {dayEvs.length>3&&<div className="sch-chip-more">+{dayEvs.length-3} more</div>}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* WEEK VIEW */}
+        {calView==="week"&&(
+          <div className="sch-week-grid">
+            {weekDays().map((day,i)=>{
+              const isToday=isSameDay(day,today);
+              const dayEvs=filteredEvents.filter(ev=>{const d=evDate(ev);return d&&isSameDay(d,day);}).sort((a,b)=>(a.startTime||"").localeCompare(b.startTime||""));
+              const DOW=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+              return(
+                <div key={i} className={`sch-week-col ${isToday?"sch-week-col-today":""}`}>
+                  <div className="sch-week-dow">{DOW[i]}</div>
+                  <div className={`sch-week-num ${isToday?"sch-week-num-today":""}`}>{day.getDate()}</div>
+                  {isToday&&<div className="sch-week-today-lbl">Today</div>}
+                  <div className="sch-week-events">
+                    {dayEvs.map(ev=><Chip key={ev.id} ev={ev}/>)}
+                    {!dayEvs.length&&<div className="sch-week-empty">—</div>}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* LIST VIEW */}
+        {calView==="list"&&(
+          <div className="sch-list">
+            {filteredEvents.filter(ev=>evDate(ev)).length===0&&<div className="sch-list-empty">No events</div>}
+            {filteredEvents
+              .filter(ev=>evDate(ev))
+              .sort((a,b)=>new Date(a.date)-new Date(b.date))
+              .map(ev=>{
+                const stk=sticker(ev);const d=evDate(ev);
+                return(
+                  <div key={ev.id} className="sch-list-row" style={{borderLeftColor:stk.bar}} onClick={()=>onSelect(ev.id)}>
+                    <div className="sch-list-date">{d.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"})}</div>
+                    <div className="sch-list-name">{ev.name}</div>
+                    <div className="sch-list-meta">{ev.startTime?fmtTime(ev.startTime):""}{"  "}{ev.guests?ev.guests+" guests":""}</div>
+                  </div>
+                );
+              })
+            }
+          </div>
+        )}
       </div>
-
-      {/* WEEK VIEW */}
-      {calView==="week"&&(
-        <div className="cal-week-grid">
-          {weekDays().map((day,i)=>{
-            const isToday=isSameDay(day,today);
-            const dayEvs=activeEvents.filter(ev=>{const d=evDate(ev);return d&&isSameDay(d,day);}).sort((a,b)=>(a.startTime||"").localeCompare(b.startTime||""));
-            return(
-              <div key={i}>
-                <div className={`cal-day-header ${isToday?"cal-day-today":""}`}>
-                  <div className="cal-day-dow">{DAYS[i]}</div>
-                  <div className="cal-day-num">{day.getDate()}</div>
-                  {isToday&&<div style={{fontSize:10,color:"var(--accent)",fontWeight:700,marginTop:2}}>Today</div>}
-                </div>
-                <div className="cal-day-cell">
-                  {dayEvs.map(ev=>{
-                    const st=getStatus(ev);
-                    const bg=evColor(ev);
-                    const tc=textColor(bg);
-                    return(
-                      <div key={ev.id} className="cal-ev-chip" style={{background:lightTint(bg,0.18),border:`1.5px solid ${bg}`,color:"var(--text)"}} onClick={()=>onSelect(ev.id)}>
-                        {ev.startTime&&<div className="cal-ev-time" style={{color:bg,fontWeight:800}}>{fmtTime(ev.startTime)}</div>}
-                        <div className="cal-ev-name" style={{color:"var(--text)"}}>{ev.name}</div>
-                        {ev.guests&&<div className="cal-ev-guests" style={{color:"var(--muted)"}}>{ev.guests} guests</div>}
-                        <div className="cal-ev-status" style={{background:lightTint(bg,0.35),color:bg,border:`1px solid ${bg}`}}>{statusLabel[st]||"PENDING"}</div>
-                      </div>
-                    );
-                  })}
-                  {!dayEvs.length&&<div style={{fontSize:11,color:"var(--border2)",paddingTop:4}}>—</div>}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* MONTH VIEW */}
-      {calView==="month"&&(
-        <div className="cal-month-grid">
-          {["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(d=>(
-            <div key={d} className="cal-month-dow">{d}</div>
-          ))}
-          {monthDays().map(({date,cur},i)=>{
-            const isToday=isSameDay(date,today);
-            const dayEvs=activeEvents.filter(ev=>{const d=evDate(ev);return d&&isSameDay(d,date);}).sort((a,b)=>(a.startTime||"").localeCompare(b.startTime||""));
-            return(
-              <div key={i} className={`cal-month-cell ${!cur?"other-month":""} ${isToday?"today":""}`}>
-                <div className="cal-month-date">{date.getDate()}</div>
-                {dayEvs.slice(0,3).map(ev=>{
-                  const bg=evColor(ev);
-                  const tc=textColor(bg);
-                  return(
-                    <div key={ev.id} className="cal-month-chip" style={{background:lightTint(bg,0.2),color:"var(--text)",border:`1.5px solid ${bg}`,fontWeight:700}} onClick={()=>onSelect(ev.id)}>
-                      <span style={{color:bg,fontWeight:800}}>{ev.startTime?fmtTime(ev.startTime)+" ":""}</span>{ev.name}
-                    </div>
-                  );
-                })}
-                {dayEvs.length>3&&<div style={{fontSize:9,color:"var(--muted)",fontWeight:600,marginTop:2}}>+{dayEvs.length-3} more</div>}
-              </div>
-            );
-          })}
-        </div>
-      )}
     </div>
   );
 }
@@ -1388,7 +1465,7 @@ export default function App() {
   const [isOwner,setIsOwner] = useState(false);
 
   const [showPin,setShowPin] = useState(false);
-  const [devData,setDevData] = useState({pin:"1234",ownerPin:"0000",customRecipes:{},customIngredients:{}});
+  const [devData,setDevData] = useState({pin:"1234",ownerPin:"0000",customRecipes:{},customIngredients:{},userName:""});
   const [events,setEvents]   = useState([]);
   const [loading,setLoading] = useState(true);
 
@@ -1432,7 +1509,7 @@ export default function App() {
     <>
       <style>{CSS}</style>
       {mode==="staff"?(
-        <StaffApp events={events} mutEv={mutEv} ING={ING} RECIPES={RECIPES} onGear={()=>setShowPin(true)}/>
+        <StaffApp events={events} mutEv={mutEv} ING={ING} RECIPES={RECIPES} onGear={()=>setShowPin(true)} userName={devData.userName||""} isOwner={isOwner}/>
       ):(
         <MgrApp devData={devData} mutDev={mutDev} ING={ING} RECIPES={RECIPES} onExit={()=>{setMode("staff");setIsOwner(false);}} isOwner={isOwner} events={events} mutEv={mutEv}/>
       )}
@@ -1581,7 +1658,7 @@ function EditEventModal({event,onSave,onClose}){
 }
 
 // ─── STAFF APP ───
-function StaffApp({events,mutEv,ING,RECIPES,onGear}){
+function StaffApp({events,mutEv,ING,RECIPES,onGear,userName,isOwner}){
   const [view,setView]=useState("dashboard");
   const [activeId,setActiveId]=useState(null);
   const [pendingSelections,setPendingSelections]=useState([]);
@@ -1805,7 +1882,7 @@ function StaffApp({events,mutEv,ING,RECIPES,onGear}){
           <button className="gear-new" onClick={onGear} title="Manager Access">⚙</button>
         </div>
       </nav>
-      {view==="dashboard"&&<Dashboard events={events} onSelect={id=>{setActiveId(id);const ev=events.find(e=>e.id===id);if(ev?.draft&&ev?.menuSelections?.length>0){const ci=calcPrepList(ev.menuSelections,ING,RECIPES);setPendingSelections(ev.menuSelections);setPendingCalcItems(ci);setView("review");}else{setView("sheet");}}} onNew={()=>setView("create")} onDuplicate={duplicateEvent} onArchive={archiveEvent} onPrint={id=>{setActiveId(id);setView("sheet");setTimeout(()=>setShowPrintModal(true),100);}} onDelete={id=>{if(events.find(e=>e.id===id))deleteEvent(id);}}/>}
+      {view==="dashboard"&&<Dashboard events={events} userName={userName} isOwner={isOwner} onSelect={id=>{setActiveId(id);const ev=events.find(e=>e.id===id);if(ev?.draft&&ev?.menuSelections?.length>0){const ci=calcPrepList(ev.menuSelections,ING,RECIPES);setPendingSelections(ev.menuSelections);setPendingCalcItems(ci);setView("review");}else{setView("sheet");}}} onNew={()=>setView("create")} onDuplicate={duplicateEvent} onArchive={archiveEvent} onPrint={id=>{setActiveId(id);setView("sheet");setTimeout(()=>setShowPrintModal(true),100);}} onDelete={id=>{if(events.find(e=>e.id===id))deleteEvent(id);}}/>}
       {/* Wizard views - outside wrap for full width */}
       {view==="create"&&(
         <div className="wiz-layout">
@@ -1847,12 +1924,12 @@ function StaffApp({events,mutEv,ING,RECIPES,onGear}){
         onDelete={()=>{if(confirm("Delete this event?"))deleteEvent(active.id);}}
         printMode={printMode}
       />}
-      {(view==="past"||view==="calendar")&&(
+      {view==="past"&&(
         <div className="wrap">
-          {view==="past"&&<PastEvents events={events.filter(ev=>ev.archived&&!ev.deleted)} onSelect={id=>{setActiveId(id);const ev=events.find(e=>e.id===id);if(ev?.draft&&ev?.menuSelections?.length>0){const ci=calcPrepList(ev.menuSelections,ING,RECIPES);setPendingSelections(ev.menuSelections);setPendingCalcItems(ci);setView("review");}else{setView("sheet");}}} onDuplicate={duplicateEvent}/>}
-          {view==="calendar"&&<CalendarView events={events.filter(ev=>!ev.archived&&!ev.deleted)} onSelect={id=>{setActiveId(id);const ev=events.find(e=>e.id===id);if(ev?.draft&&ev?.menuSelections?.length>0){const ci=calcPrepList(ev.menuSelections,ING,RECIPES);setPendingSelections(ev.menuSelections);setPendingCalcItems(ci);setView("review");}else{setView("sheet");}}}/>}
+          <PastEvents events={events.filter(ev=>ev.archived&&!ev.deleted)} onSelect={id=>{setActiveId(id);const ev=events.find(e=>e.id===id);if(ev?.draft&&ev?.menuSelections?.length>0){const ci=calcPrepList(ev.menuSelections,ING,RECIPES);setPendingSelections(ev.menuSelections);setPendingCalcItems(ci);setView("review");}else{setView("sheet");}}} onDuplicate={duplicateEvent}/>
         </div>
       )}
+      {view==="calendar"&&<CalendarView events={events.filter(ev=>!ev.archived&&!ev.deleted)} onSelect={id=>{setActiveId(id);const ev=events.find(e=>e.id===id);if(ev?.draft&&ev?.menuSelections?.length>0){const ci=calcPrepList(ev.menuSelections,ING,RECIPES);setPendingSelections(ev.menuSelections);setPendingCalcItems(ci);setView("review");}else{setView("sheet");}}}/>}
       {showPrintModal&&<PrintModal onClose={()=>setShowPrintModal(false)} onPrint={setPrintMode}/>}
       {showEditModal&&active&&<EditEventModal event={active} onSave={p=>{updateEvent(active.id,p);setShowEditModal(false);}} onClose={()=>setShowEditModal(false)}/>}
     </>
@@ -1900,9 +1977,28 @@ function CardMenu({evId,archived,onOpen,onDuplicate,onArchive,onPrint,onDelete})
 }
 
 
-function Dashboard({events,onSelect,onNew,onDuplicate,onArchive,onPrint,onDelete}){
+function Dashboard({events,onSelect,onNew,onDuplicate,onArchive,onPrint,onDelete,userName,isOwner}){
   const [search,setSearch]=useState("");
   const [statusFilter,setStatusFilter]=useState("All");
+  const [weather,setWeather]=useState(null);
+
+  useEffect(()=>{
+    const WMO={0:"Clear",1:"Mostly clear",2:"Partly cloudy",3:"Overcast",45:"Foggy",48:"Foggy",51:"Light drizzle",53:"Drizzle",55:"Heavy drizzle",61:"Light rain",63:"Rain",65:"Heavy rain",71:"Light snow",73:"Snow",75:"Heavy snow",80:"Showers",81:"Showers",82:"Heavy showers",95:"Thunderstorm",96:"Thunderstorm",99:"Thunderstorm"};
+    const ICON={0:"☀️",1:"🌤",2:"⛅️",3:"☁️",45:"🌫",48:"🌫",51:"🌦",53:"🌦",55:"🌧",61:"🌦",63:"🌧",65:"🌧",71:"🌨",73:"❄️",75:"❄️",80:"🌧",81:"🌧",82:"⛈",95:"⛈",96:"⛈",99:"⛈"};
+    const fetch_weather=(lat,lon)=>{
+      fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode,windspeed_10m&temperature_unit=fahrenheit&windspeed_unit=mph`)
+        .then(r=>r.json())
+        .then(d=>{
+          const c=d.current;
+          setWeather({temp:Math.round(c.temperature_2m),icon:ICON[c.weathercode]||"🌡",desc:WMO[c.weathercode]||"",wind:Math.round(c.windspeed_10m)});
+        }).catch(()=>{});
+    };
+    if(navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(p=>fetch_weather(p.coords.latitude,p.coords.longitude),()=>fetch_weather(34.0522,-118.2437));
+    } else {
+      fetch_weather(34.0522,-118.2437);
+    }
+  },[]);
 
   const fmt=d=>d?new Date(d+"T00:00:00").toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"}):"";
   const fmtTime=t=>{if(!t)return"";const[h,m]=t.split(":");const hr=parseInt(h,10);return`${hr%12||12}:${m}${hr>=12?"p":"a"}`;};
@@ -1952,7 +2048,7 @@ function Dashboard({events,onSelect,onNew,onDuplicate,onArchive,onPrint,onDelete
   ];
 
   // Filtered ledger
-  const statusMap={"In Prep":"prep","Loaded":"loaded","Returned":"returned"};
+  const statusMap={"In Prep":"prep","Prepped":"prepped","Loaded":"loaded","Returned":"returned"};
   const filteredEvents=activeEvents.filter(ev=>{
     const st=getStatus(ev);
     if(statusFilter!=="All"&&st!==statusMap[statusFilter])return false;
@@ -1976,18 +2072,34 @@ function Dashboard({events,onSelect,onNew,onDuplicate,onArchive,onPrint,onDelete
     <div className="cockpit">
       {/* SIDEBAR */}
       <aside className="cockpit-sidebar">
+        {/* Greeting */}
+        {(()=>{
+          const hr=new Date().getHours();
+          const greeting=hr<12?"Good morning":hr<17?"Good afternoon":hr<21?"Good evening":"It's late";
+          const name=userName||(isOwner?"Chef":"Chef");
+          return(
+            <div>
+              <div style={{fontSize:26,fontWeight:700,color:"var(--carbon-300)",letterSpacing:"-.02em",lineHeight:1.15}}>{greeting},</div>
+              <div style={{fontSize:26,fontWeight:700,color:"var(--clay-500)",letterSpacing:"-.02em",lineHeight:1.15}}>{name}.</div>
+            </div>
+          );
+        })()}
+        {/* Date */}
+        <div style={{fontSize:10,fontWeight:700,letterSpacing:".2em",textTransform:"uppercase",color:"var(--clay-500)"}}>{dayLabel}</div>
+
+        {/* + New Event */}
+        <button className="btn btn-primary" style={{width:"100%",padding:"10px 18px",fontSize:12,letterSpacing:".02em",borderRadius:8}} onClick={onNew}>
+          + New Event
+        </button>
+
         {/* Today summary */}
         {(()=>{
           const todayStr=today.toISOString().split("T")[0];
           const todayEvs=activeEvents.filter(ev=>ev.date===todayStr);
           const todayGuests=todayEvs.reduce((s,ev)=>s+(parseInt(ev.guests)||0),0);
           return(
-            <div style={{display:"flex",flexDirection:"column",gap:12}}>
-              {/* Date */}
-              <div style={{fontSize:10,fontWeight:700,letterSpacing:".2em",textTransform:"uppercase",color:"var(--clay-500)"}}>{dayLabel}</div>
-              {/* Today stats */}
-              <div className="kpi-tile">
-                <div className="kpi-tile-bar" style={{background:"var(--clay-500)"}}/>
+            <div className="kpi-tile">
+                <div className="kpi-tile-bar" style={{background:"var(--purple)"}}/>
                 <div style={{paddingLeft:10}}>
                   <div className="kpi-label" style={{marginBottom:8}}>Today</div>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline"}}>
@@ -2002,7 +2114,6 @@ function Dashboard({events,onSelect,onNew,onDuplicate,onArchive,onPrint,onDelete
                   </div>
                 </div>
               </div>
-            </div>
           );
         })()}
 
@@ -2022,15 +2133,22 @@ function Dashboard({events,onSelect,onNew,onDuplicate,onArchive,onPrint,onDelete
           ))}
         </div>
 
-        {/* + New Event */}
-        <button className="btn btn-primary" style={{width:"100%",padding:"10px 18px",fontSize:12,letterSpacing:".02em",borderRadius:8}} onClick={onNew}>
-          + New Event
-        </button>
-
-        {/* Quote */}
-        <div className="sidebar-quote">
-          "La cocina sin orden es solo humo y prisa."<br/>— house rule #1
-        </div>
+        {/* Weather */}
+        {weather&&(
+          <div className="kpi-tile">
+            <div className="kpi-tile-bar" style={{background:"var(--turquesa-500)"}}/>
+            <div className="kpi-tile-inner">
+              <div style={{flex:1,minWidth:0}}>
+                <div className="kpi-label">Outside</div>
+                <div className="kpi-sub">{weather.desc}{weather.wind?` · ${weather.wind} mph`:""}</div>
+              </div>
+              <div style={{display:"flex",alignItems:"center",gap:6}}>
+                <span style={{fontSize:20}}>{weather.icon}</span>
+                <span className="kpi-value">{weather.temp}°</span>
+              </div>
+            </div>
+          </div>
+        )}
       </aside>
 
       {/* MAIN FEED */}
@@ -2041,7 +2159,7 @@ function Dashboard({events,onSelect,onNew,onDuplicate,onArchive,onPrint,onDelete
             <span className="feed-search-icon">⌕</span>
             <input className="feed-search" placeholder="Search events, clients, dishes…" value={search} onChange={e=>setSearch(e.target.value)}/>
           </div>
-          {["All","In Prep","Loaded","Returned"].map(f=>(
+          {["All","In Prep","Prepped","Loaded","Returned"].map(f=>(
             <button key={f} className={`filter-pill ${statusFilter===f?"on":""}`} onClick={()=>setStatusFilter(f)}>{f}</button>
           ))}
         </div>
@@ -2076,7 +2194,7 @@ function Dashboard({events,onSelect,onNew,onDuplicate,onArchive,onPrint,onDelete
                   <div style={{fontSize:34,fontWeight:700,letterSpacing:"-.02em",color:"var(--carbon-300)",marginTop:4,lineHeight:1.1}}>
                     {nextEvent.name}
                   </div>
-                  <div style={{fontFamily:"var(--font-serif)",fontStyle:"italic",fontSize:14,color:"var(--carbon-50)",marginTop:3}}>
+                  <div style={{fontFamily:"var(--font-serif)",fontSize:14,color:"var(--carbon-50)",marginTop:3}}>
                     {nextEvent.truck}
                   </div>
                 </div>
@@ -2361,7 +2479,7 @@ function MenuBuilder({event,RECIPES,ING,onApply,onSkip,onBack}){
               );
             })}
             {calcResults.length===0&&(
-              <div style={{padding:"20px 14px",textAlign:"center",fontSize:12,color:"var(--carbon-50)",fontFamily:"var(--font-serif)",fontStyle:"italic"}}>Add dishes to see ingredient totals</div>
+              <div style={{padding:"20px 14px",textAlign:"center",fontSize:12,color:"var(--carbon-50)",fontFamily:"var(--font-serif)"}}>Add dishes to see ingredient totals</div>
             )}
           </div>
         </div>
@@ -3026,8 +3144,7 @@ function MgrApp({devData,mutDev,ING,RECIPES,onExit,isOwner,events,mutEv}){
           ))}
         </div>
         <div className="nav-right-new">
-          <span className="dev-tag">{isOwner?"OWNER":"MGR"}</span>
-          <div className="sync-pill"><span className="sync-dot"/><span>Admin mode</span></div>
+          <div className="sync-pill"><span className="sync-dot"/><span>{isOwner?"Owner mode":"Admin mode"}</span></div>
           <button className="gear-new" onClick={onExit} title="← Staff View" style={{fontSize:11,fontWeight:700,width:"auto",padding:"0 12px"}}>← Staff View</button>
           <div className="avatar-new">JC</div>
         </div>
@@ -3043,7 +3160,7 @@ function MgrApp({devData,mutDev,ING,RECIPES,onExit,isOwner,events,mutEv}){
         </div>
         <div className="mgr-content">
           {tab==="recipes"&&(editingRecipe?
-            <RecipeEditor recipeKey={editingRecipe==="new"?null:editingRecipe} recipe={editingRecipe==="new"?null:RECIPES[editingRecipe]} isCustom={editingRecipe==="new"||!!devData.customRecipes[editingRecipe]} ING={ING} onSave={saveRecipe} onDelete={isOwner&&editingRecipe!=="new"?()=>{deleteRecipe(editingRecipe);setEditingRecipe(null);}:null} onCancel={()=>setEditingRecipe(null)} isOwner={isOwner} events={events}/>:
+            <RecipeEditor recipeKey={editingRecipe==="new"?null:editingRecipe} recipe={editingRecipe==="new"?null:RECIPES[editingRecipe]} ING={ING} onSave={saveRecipe} onDelete={isOwner&&editingRecipe!=="new"?()=>{deleteRecipe(editingRecipe);setEditingRecipe(null);}:null} onCancel={()=>setEditingRecipe(null)} isOwner={isOwner} events={events}/>:
             <RecipeList RECIPES={RECIPES} customKeys={Object.keys(devData.customRecipes)} onEdit={setEditingRecipe} onNew={()=>setEditingRecipe("new")} onDelete={key=>{deleteRecipe(key);setEditingRecipe(null);}} isOwner={isOwner} events={events}/>
           )}
           {tab==="ingredients"&&<IngredientManager ING={ING} customKeys={Object.keys(devData.customIngredients||{})} onSave={saveIngredient} onUpdate={updateIngredient} onDelete={deleteIngredient} isOwner={isOwner} RECIPES={RECIPES}/>}
@@ -3199,7 +3316,7 @@ function MgrApp({devData,mutDev,ING,RECIPES,onExit,isOwner,events,mutEv}){
             </div>
           </div>
         )}
-        {tab==="settings"&&<DevSettings currentPin={devData.pin} currentOwnerPin={devData.ownerPin} onSave={savePin} onSaveOwner={pin=>mutDev(p=>({...p,ownerPin:pin}))} isOwner={isOwner}/>}
+        {tab==="settings"&&<DevSettings currentPin={devData.pin} currentOwnerPin={devData.ownerPin} userName={devData.userName||""} onSaveName={name=>mutDev(p=>({...p,userName:name}))} onSave={savePin} onSaveOwner={pin=>mutDev(p=>({...p,ownerPin:pin}))} isOwner={isOwner}/>}
         </div>
       </div>
     </>
@@ -3214,7 +3331,7 @@ function RecipeList({RECIPES,customKeys,onEdit,onNew,onDelete,isOwner,events}){
   return(
     <div>
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16}}>
-        <div><div className="mgr-page-title">Recipe Manager</div><div className="mgr-page-sub">{Object.keys(RECIPES).length} recipes · {customKeys.length} custom</div></div>
+        <div><div className="mgr-page-title">Recipe Manager</div><div className="mgr-page-sub">{Object.keys(RECIPES).length} recipes</div></div>
         <button className="btn btn-primary" onClick={onNew}>+ Add New Recipe</button>
       </div>
       <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:16}}>
@@ -3251,7 +3368,7 @@ function RecipeList({RECIPES,customKeys,onEdit,onNew,onDelete,isOwner,events}){
 }
 
 // ─── RECIPE EDITOR ───
-function RecipeEditor({recipeKey,recipe,isCustom,ING,onSave,onDelete,onCancel}){
+function RecipeEditor({recipeKey,recipe,ING,onSave,onDelete,onCancel}){
   const [label,setLabel]=useState(recipe?.label||"");
   const [cat,setCat]=useState(recipe?.cat||"TACOS");
   const [sw,setSw]=useState(recipe?.servingWord||"serving");
@@ -3271,7 +3388,7 @@ function RecipeEditor({recipeKey,recipe,isCustom,ING,onSave,onDelete,onCancel}){
     <div>
       <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16}}>
         <button className="btn btn-devghost btn-sm" onClick={onCancel}>← Back</button>
-        <div><div className="mgr-page-title">{recipeKey&&recipeKey!=="new"?"Edit Recipe":"New Recipe"}</div>{!isCustom&&recipeKey&&<div style={{fontSize:12,color:"#94A3B8"}}>Built-in — changes save as an override</div>}</div>
+        <div><div className="mgr-page-title">{recipeKey&&recipeKey!=="new"?"Edit Recipe":"New Recipe"}</div></div>
       </div>
       <div className="recipe-editor">
         <div className="fgrid" style={{marginBottom:16}}>
@@ -3342,7 +3459,7 @@ function IngredientManager({ING,customKeys,onSave,onUpdate,onDelete,isOwner,RECI
   return(
     <div>
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14}}>
-        <div><div className="mgr-page-title">Ingredient Library</div><div className="mgr-page-sub">{Object.keys(ING).length} ingredients · {customKeys.length} custom (editable)</div></div>
+        <div><div className="mgr-page-title">Ingredient Library</div><div className="mgr-page-sub">{Object.keys(ING).length} ingredients</div></div>
         <button className="btn btn-primary" onClick={()=>setAdding(true)}>+ Add Ingredient</button>
       </div>
 
@@ -3424,16 +3541,25 @@ function IngredientManager({ING,customKeys,onSave,onUpdate,onDelete,isOwner,RECI
 }
 
 // ─── MGR SETTINGS ───
-function DevSettings({currentPin,currentOwnerPin,onSave,onSaveOwner,isOwner}){
+function DevSettings({currentPin,currentOwnerPin,userName,onSaveName,onSave,onSaveOwner,isOwner}){
   const [pin,setPin]=useState(""); const [confirm2,setConfirm2]=useState(""); const [msg,setMsg]=useState("");
   const [opin,setOpin]=useState(""); const [oconfirm,setOconfirm]=useState(""); const [omsg,setOmsg]=useState("");
+  const [nameVal,setNameVal]=useState(userName); const [nameMsg,setNameMsg]=useState("");
   const handle=()=>{if(pin.length<3){setMsg("PIN must be at least 3 characters");return;}if(pin!==confirm2){setMsg("PINs don't match");return;}onSave(pin);setMsg("PIN updated!");setPin("");setConfirm2("");setTimeout(()=>setMsg(""),2500);};
   const handleOwner=()=>{if(opin.length<3){setOmsg("PIN must be at least 3 characters");return;}if(opin!==oconfirm){setOmsg("PINs don't match");return;}onSaveOwner(opin);setOmsg("Owner PIN updated!");setOpin("");setOconfirm("");setTimeout(()=>setOmsg(""),2500);};
+  const handleName=()=>{onSaveName(nameVal.trim());setNameMsg("Name saved!");setTimeout(()=>setNameMsg(""),2500);};
   return(
     <div>
       <div className="mgr-page-title" style={{marginBottom:3}}>Settings</div>
       <div className="mgr-page-sub" style={{marginBottom:18}}>Manage manager access and configuration</div>
       <div className="settings-card">
+        <div style={{fontSize:15,fontWeight:700,marginBottom:5}}>Your Name</div>
+        <div style={{fontSize:12,color:"var(--muted)",marginBottom:16}}>Shown in the dashboard greeting.</div>
+        <div className="fg"><label className="flabel">Name</label><input className="finput" placeholder="e.g. Jeffrey" value={nameVal} onChange={e=>setNameVal(e.target.value)}/></div>
+        {nameMsg&&<div style={{fontSize:12,marginTop:8,color:"var(--green)"}}>{nameMsg}</div>}
+        <div style={{marginTop:14}}><button className="btn btn-primary" onClick={handleName}>Save Name</button></div>
+      </div>
+      <div className="settings-card" style={{marginTop:14}}>
         <div style={{fontSize:15,fontWeight:700,marginBottom:5}}>Change Manager PIN</div>
         <div style={{fontSize:12,color:"var(--muted)",marginBottom:16}}>Current PIN is hidden. Enter a new PIN to replace it.</div>
         <div style={{display:"flex",flexDirection:"column",gap:10,flexShrink:0}}>
