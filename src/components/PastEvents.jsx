@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { EmptyStateWrapper, EmptyEventsIllustration, EmptySearchIllustration } from "./EmptyStateVisuals";
 
 export default function PastEvents({events,onRestore,onSelect,onDuplicate}){
   const [search,setSearch]=useState("");
@@ -33,9 +34,19 @@ export default function PastEvents({events,onRestore,onSelect,onDuplicate}){
         />
       </div>
       {!archived.length?(
-        <div className="empty-state"><h3>No past events yet</h3><p>Events are automatically archived 36 hours after their start time.</p></div>
+        <EmptyStateWrapper
+          illustration={EmptyEventsIllustration}
+          title="No past events yet"
+          description="Events are automatically archived 36 hours after their start time."
+          color="var(--carbon-50)"
+        />
       ):!filtered.length?(
-        <div className="empty-state"><h3>No results for "{search}"</h3><p>Try a different search term.</p></div>
+        <EmptyStateWrapper
+          illustration={EmptySearchIllustration}
+          title={`No results for "${search}"`}
+          description="Try a different search term."
+          color="var(--carbon-50)"
+        />
       ):(
         <table className="past-events-tbl">
           <thead><tr><th>Event</th><th>Date</th><th>Guests</th><th>Items</th><th>Prepped</th><th>Accuracy</th><th>Event Notes</th><th>Post-Event Notes</th><th></th></tr></thead>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { collection, query, orderBy, limit, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase";
+import { EmptyStateWrapper, EmptyAuditIllustration } from "./EmptyStateVisuals";
 
 const ACTION_LABELS={
   event_created:"Created",
@@ -94,7 +95,12 @@ export default function AuditLog(){
       {loading?(
         <div style={{padding:40,textAlign:"center",color:"var(--carbon-50)"}}>Loading…</div>
       ):!filtered.length?(
-        <div className="empty-state"><h3>No entries found</h3><p>Try adjusting your filters.</p></div>
+        <EmptyStateWrapper
+          illustration={EmptyAuditIllustration}
+          title="No entries found"
+          description="Try adjusting your filters."
+          color="var(--carbon-50)"
+        />
       ):(
         <table className="past-events-tbl">
           <thead>

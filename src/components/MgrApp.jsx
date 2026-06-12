@@ -3,6 +3,7 @@ import { GROUPS, GROUP_ORDER, RECIPE_CATS, RCAT_COLORS } from "../data/constants
 import Logo from "./Logo";
 import UserManagement from "./UserManagement";
 import AuditLog from "./AuditLog";
+import { EmptyStateWrapper, EmptyDeletedIllustration } from "./EmptyStateVisuals";
 
 function getIngredientImpact(ingName, RECIPES){
   const affected = Object.entries(RECIPES)
@@ -433,7 +434,12 @@ export default function MgrApp({devData,mutDev,ING,RECIPES,onExit,isOwner,events
             <div className="mgr-page-title">Recycle Bin</div>
             <div className="mgr-page-sub">{events.filter(e=>e.deleted).length} deleted event{events.filter(e=>e.deleted).length!==1?"s":""} · Owner access only</div>
             {events.filter(e=>e.deleted).length===0&&(
-              <div className="empty-state"><h3>No deleted events</h3><p>Deleted events will appear here and can be restored.</p></div>
+              <EmptyStateWrapper
+                illustration={EmptyDeletedIllustration}
+                title="No deleted events"
+                description="Deleted events will appear here and can be restored."
+                color="var(--carbon-50)"
+              />
             )}
             <div style={{display:"flex",flexDirection:"column",gap:10}}>
               {events.filter(e=>e.deleted).sort((a,b)=>new Date(b.deletedAt||0)-new Date(a.deletedAt||0)).map(ev=>(
