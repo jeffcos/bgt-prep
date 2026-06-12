@@ -263,13 +263,13 @@ export default function MgrApp({devData,mutDev,ING,RECIPES,onExit,isOwner,events
 
   return(
     <>
-      <nav className="nav-new">
+      <header className="nav-new glass-panel">
         <Logo onClick={onExit}/>
-        <div className="nav-items-new">
+        <nav className="nav-items-new">
           {navItems.map(n=>(
             <button key={n.tab} className={`nav-item-new ${tab===n.tab?"on":""}`} onClick={()=>{setEditingRecipe(null);setTab(n.tab);}}>{n.label}</button>
           ))}
-        </div>
+        </nav>
         <div className="nav-right-new">
           <div className="sync-pill"><span className="sync-dot"/><span>{isOwner?"Owner mode":"Admin mode"}</span></div>
           <div className="avatar-menu-wrap" ref={userMenuRef}>
@@ -289,7 +289,7 @@ export default function MgrApp({devData,mutDev,ING,RECIPES,onExit,isOwner,events
             )}
           </div>
         </div>
-      </nav>
+      </header>
       <div className="mgr-layout">
         <div className="mgr-content" style={{maxWidth:"none",width:"100%"}}>
           {tab==="recipes"&&(editingRecipe?

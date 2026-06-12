@@ -112,9 +112,9 @@ export function EditEventModal({event,onSave,onClose}){
           </div>
           <div className="fg full">
             <label className="flabel">Event Color — matches your sticker roll</label>
-            <div className="color-picker-wrap">
+            <div className="color-picker-wrap" role="radiogroup" aria-label="Event Color">
               {EVENT_COLORS.map(c=>(
-                <button key={c.hex} className={`color-dot-btn ${f.color===c.hex?"selected":""}`} style={{background:STICKER[c.hex]?.dot||c.hex}} title={c.name} onClick={e=>{e.preventDefault();s("color",f.color===c.hex?"":c.hex);}}/>
+                <button key={c.hex} role="radio" aria-checked={f.color===c.hex} aria-label={`Select color ${c.name}`} className={`color-dot-btn ${f.color===c.hex?"selected":""}`} style={{background:STICKER[c.hex]?.dot||c.hex}} title={c.name} onClick={e=>{e.preventDefault();s("color",f.color===c.hex?"":c.hex);}}/>
               ))}
               {f.color&&<span style={{fontSize:12,color:"var(--muted)",marginLeft:4}}>{EVENT_COLORS.find(c=>c.hex===f.color)?.name}</span>}
             </div>

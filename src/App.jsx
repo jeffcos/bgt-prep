@@ -93,9 +93,9 @@ function StaffApp({events,ops,ING,RECIPES,onGear,userName,userEmail,isOwner,isMg
 
   return(
     <>
-      <nav className="nav-new">
+      <header className="nav-new glass-panel">
         <Logo onClick={()=>setView("dashboard")}/>
-        <div className="nav-items-new">
+        <nav className="nav-items-new">
           {[
             {v:"dashboard",l:"Dashboard"},
             {v:"calendar",l:"Calendar"},
@@ -104,7 +104,7 @@ function StaffApp({events,ops,ING,RECIPES,onGear,userName,userEmail,isOwner,isMg
           ].map(({v,l})=>(
             <button key={v} className={`nav-item-new ${view===v?"on":""}`} onClick={()=>setView(v)}>{l}</button>
           ))}
-        </div>
+        </nav>
         <div className="nav-right-new">
           <div className="avatar-menu-wrap" ref={userMenuRef}>
             <div className={`avatar-new${showUserMenu?" avatar-active":""}`} style={{cursor:"pointer"}} onClick={()=>setShowUserMenu(v=>!v)}>
@@ -127,7 +127,7 @@ function StaffApp({events,ops,ING,RECIPES,onGear,userName,userEmail,isOwner,isMg
             )}
           </div>
         </div>
-      </nav>
+      </header>
 
       {view==="dashboard"&&(
         <Dashboard
