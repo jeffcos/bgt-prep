@@ -2,7 +2,7 @@
   "name": "bgt-prep",
   "private": true,
   "version": "0.0.0",
-  "homepage": "https://jeffcos.github.io/bgt-prep",
+  "homepage": "https://bgtc.io",
   "type": "module",
   "scripts": {
     "predeploy": "npm run build",
@@ -13,6 +13,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "firebase": "^12.14.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

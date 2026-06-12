@@ -1,0 +1,65 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Read the calling user's role from their users doc.
+    // Falls back to "staff" if the doc doesn't exist yet (e.g. first login).
+    function role() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', 'staff');
+    }
+    function isMgr()  { return role() in ['manager', 'owner']; }
+    function isOwner(){ return role() == 'owner'; }
+    function authed() { return request.auth != null; }
+
+    // ── Events ──────────────────────────────────────────────────────────────
+    // All authenticated users can read and write events (staff, mgr, owner).
+    // Hard deletes are blocked — the app uses soft-delete (deleted:true).
+    match /events/{eventId} {
+      allow read:   if authed();
+      allow create: if authed();
+      allow update: if authed();
+      allow delete: if false;
+    }
+
+    // ── Users ───────────────────────────────────────────────────────────────
+    // All authenticated users can read all user docs — needed for a shared
+    // team platform where events, audit logs, and assignments reference any user.
+    // Users can update their own doc but NOT the role field — only owners can
+    // change roles, which closes the client-side privilege escalation hole.
+    match /users/{userId} {
+      allow read: if authed() && (request.auth.uid == userId || isOwner());
+
+      // UserManagement creates docs on behalf of new users
+      allow create: if authed() && isOwner();
+
+      allow update: if authed() && (
+        // Owner can change anything, including role
+        isOwner()
+        ||
+        // Users can update their own profile but cannot touch 'role'
+        (request.auth.uid == userId
+          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']))
+      );
+
+      allow delete: if authed() && isOwner();
+    }
+
+    // ── Config (recipes / ingredients) ──────────────────────────────────────
+    // All authenticated users need to read config to get recipes/ingredients.
+    // Only managers and owners can write.
+    match /config/{docId} {
+      allow read:  if authed();
+      allow write: if authed() && isMgr();
+    }
+
+    // ── Audit logs ──────────────────────────────────────────────────────────
+    // Any authenticated user can append a log entry.
+    // Only managers and owners can read logs.
+    // Logs are immutable once written.
+    match /auditLogs/{logId} {
+      allow read:          if authed() && isMgr();
+      allow create:        if authed();
+      allow update, delete: if false;
+    }
+  }
+}
