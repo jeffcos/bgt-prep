@@ -33,9 +33,13 @@ export function EventForm({onSubmit,onCancel}){
   const [f,setF]=useState({name:"",truck:"",date:"",guests:"",startTime:"",orderReadyBy:"",loadBy:"",color:""});
   const s=(k,v)=>setF(p=>({...p,[k]:v}));
   return(
-    <div style={{maxWidth:860}}>
-      <div className="page-title" style={{marginBottom:3}}>New Event</div>
-      <div className="page-sub">Step 1 of 2 — Enter event details</div>
+    <div style={{width:"100%",maxWidth:720}}>
+      <div className="wiz-hdr">
+        <div>
+          <div className="wiz-step-eyebrow">Step 1 of 3</div>
+          <div className="wiz-title">Enter event details</div>
+        </div>
+      </div>
       <div className="fcard">
         <div className="fgrid">
           <div className="fg full"><label className="flabel">Event Name *</label><input className="finput" placeholder="e.g. Smith Wedding · Google HQ Catering" value={f.name} onChange={e=>s("name",e.target.value)}/></div>

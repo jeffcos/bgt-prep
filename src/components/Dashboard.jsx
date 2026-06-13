@@ -135,242 +135,227 @@ export default function Dashboard({events,onSelect,onNew,onDuplicate,onArchive,o
   };
 
   return(
-    <div className="cockpit">
-      {/* SIDEBAR */}
-      <aside className="cockpit-sidebar">
-        {/* Greeting */}
-        {(()=>{
-          const hr=new Date().getHours();
-          const greeting=hr<12?"Good morning":hr<17?"Good afternoon":hr<21?"Good evening":"It's late";
-          const name=(userName||"Chef").split(" ")[0];
-          return(
-            <div>
-              <div style={{fontSize:26,fontWeight:700,color:"var(--carbon-300)",letterSpacing:"-.02em",lineHeight:1.15}}>{greeting},</div>
-              <div style={{fontSize:26,fontWeight:700,color:"var(--clay-500)",letterSpacing:"-.02em",lineHeight:1.15}}>{name}.</div>
-            </div>
-          );
-        })()}
-        {/* Date */}
-        <div style={{fontSize:10,fontWeight:700,letterSpacing:".2em",textTransform:"uppercase",color:"var(--clay-500)"}}>{dayLabel}</div>
+    <div className="dashboard-grid wrap" style={{paddingTop: 32}}>
+      {/* HEADER ROW */}
+      <div className="dash-header-row" style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end",marginBottom:32}}>
+        <div className="dash-greeting">
+          {(()=>{
+            const hr=new Date().getHours();
+            const greeting=hr<12?"Good morning":hr<17?"Good afternoon":hr<21?"Good evening":"It's late";
+            const name=(userName||"Chef").split(" ")[0];
+            return(
+              <div style={{fontSize:32,fontWeight:700,letterSpacing:"-.02em",lineHeight:1.1}}>
+                <span style={{color:"var(--carbon-300)"}}>{greeting} </span>
+                <span style={{color:"var(--accent)"}}>{name}</span>
+              </div>
+            );
+          })()}
+        </div>
+        <div className="dash-header-actions" style={{display:"flex",alignItems:"center",gap:20}}>
+          <div style={{display:"flex",alignItems:"center",gap:12,background:"rgba(255, 255, 255, 0.75)",backdropFilter:"blur(8px)",border:"1px solid var(--border)",padding:"6px 16px",borderRadius:20,boxShadow:"var(--shadow)",fontSize:12,fontWeight:700,color:"var(--carbon-200)"}}>
+            <span style={{letterSpacing:".15em",textTransform:"uppercase",color:"var(--muted)"}}>{dayLabel}</span>
+            {weather&&(
+              <>
+                <span style={{color:"var(--border2)",fontWeight:300}}>|</span>
+                <div style={{display:"flex",alignItems:"center",gap:6}} title={weather.desc}>
+                  <span style={{fontSize:15}}>{weather.icon}</span>
+                  <span>{weather.temp}°</span>
+                  <span style={{fontSize:11,fontWeight:500,color:"var(--muted)",marginLeft:2,textTransform:"none"}}>{weather.desc}</span>
+                </div>
+              </>
+            )}
+          </div>
+          <button className="btn btn-primary" style={{padding:"12px 24px",fontSize:14,borderRadius:12}} onClick={onNew}>
+            + New Event
+          </button>
+        </div>
+      </div>
 
-        {/* + New Event */}
-        <button className="btn btn-primary" style={{width:"100%",padding:"10px 18px",fontSize:12,letterSpacing:".02em",borderRadius:8}} onClick={onNew}>
-          + New Event
-        </button>
-
-        {/* Today summary */}
+      {/* KPI ROW */}
+      <div className="dash-kpi-row" style={{display:"grid",gridTemplateColumns:"repeat(5, 1fr)",gap:16,marginBottom:32}}>
         {(()=>{
           const todayStr=today.toISOString().split("T")[0];
           const todayEvs=activeEvents.filter(ev=>ev.date===todayStr);
           const todayGuests=todayEvs.reduce((s,ev)=>s+(parseInt(ev.guests)||0),0);
           return(
-            <div className="kpi-tile">
-                <div className="kpi-tile-bar" style={{background:"var(--purple)"}}/>
-                <div style={{paddingLeft:10}}>
-                  <div className="kpi-label" style={{marginBottom:8}}>Today</div>
-                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline"}}>
-                    <div>
-                      <div className="kpi-value">{todayEvs.length}</div>
-                      <div className="kpi-sub">{todayEvs.length===1?"event":"events"}</div>
-                    </div>
-                    <div style={{textAlign:"right"}}>
-                      <div className="kpi-value">{todayGuests||"—"}</div>
-                      <div className="kpi-sub">guests</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            <div className="wstat" style={{padding:"16px",display:"flex",flexDirection:"column",alignItems:"flex-start",justifyContent:"flex-start"}}>
+              <div className="wstat-label">TODAY</div>
+              <div className="wstat-value">{todayEvs.length}</div>
+              <div className="wstat-sub">{todayGuests} guests</div>
+              <div className="wstat-bar" style={{width:"100%",background:"var(--carbon-08)",height:3}}><div className="wstat-bar-fill" style={{width:"100%",background:"var(--purple)"}}/></div>
+            </div>
           );
         })()}
+        {kpis.map((k,i)=>(
+          <div key={i} className="wstat" style={{padding:"16px",display:"flex",flexDirection:"column",alignItems:"flex-start",justifyContent:"flex-start"}}>
+            <div className="wstat-label">{k.label}</div>
+            <div className="wstat-value">{k.value}</div>
+            <div className="wstat-sub">{k.sub}</div>
+            <div className="wstat-bar" style={{width:"100%",background:"var(--carbon-08)",height:3}}><div className="wstat-bar-fill" style={{width:"100%",background:k.bar}}/></div>
+          </div>
+        ))}
+      </div>
 
-        {/* KPI tiles */}
-        <div style={{display:"flex",flexDirection:"column",gap:10}}>
-          {kpis.map((k,i)=>(
-            <div key={i} className="kpi-tile">
-              <div className="kpi-tile-bar" style={{background:k.bar}}/>
-              <div className="kpi-tile-inner">
-                <div style={{flex:1,minWidth:0}}>
-                  <div className="kpi-label">{k.label}</div>
-                  <div className="kpi-sub">{k.sub}</div>
-                </div>
-                <div className="kpi-value">{k.value}</div>
-              </div>
+      {/* MAIN PANELS */}
+      <div className="dash-panels" style={{display:"grid",gridTemplateColumns:"minmax(0, 1fr) 360px",gap:24,alignItems:"start"}}>
+        {/* LEFT COLUMN: Ledger */}
+        <div className="dash-panel dash-col-left" style={{minWidth:0,background:"var(--card)",borderRadius:16,padding:24,boxShadow:"var(--shadow)",border:"1px solid var(--border)"}}>
+          <div style={{fontSize:20,fontWeight:800,marginBottom:20,color:"var(--carbon-300)"}}>Active Bookings</div>
+          
+          <div className="feed-filter-bar" style={{display:"flex",gap:16,marginBottom:20}}>
+            <div className="feed-search-wrap" style={{flex:1}}>
+              <span className="feed-search-icon">⌕</span>
+              <input className="dash-search" style={{width:"100%", boxSizing:"border-box"}} placeholder="Search events, clients, dishes…" value={search} onChange={e=>setSearch(e.target.value)}/>
             </div>
-          ))}
+            <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
+              {["All","In Prep","Prepped","Loaded","Returned"].map(f=>(
+                <button key={f} className={`filter-pill ${statusFilter===f?"on":""}`} onClick={()=>setStatusFilter(f)}>{f}</button>
+              ))}
+            </div>
+          </div>
+
+          <div className="ledger">
+            <div className="ledger-head">
+              <span/><span>Date</span><span>Event</span><span>Location</span>
+              <span style={{textAlign:"right"}}>Guests</span>
+              <span className="ledger-col-prep">Prep</span>
+              <span className="ledger-col-until" style={{textAlign:"right"}}>Until Start</span>
+              <span className="ledger-col-status" style={{textAlign:"center"}}>Status</span>
+              <span style={{textAlign:"right"}}>·</span>
+            </div>
+            {filteredEvents.length===0&&(
+              <EmptyStateWrapper
+                illustration={EmptySearchIllustration}
+                title={search||statusFilter!=="All"?"No Events Found":"No active events"}
+                description={search||statusFilter!=="All"?"No events match your filter.":"No active events. Create one to get started."}
+                color="var(--accent)"
+              />
+            )}
+            {filteredEvents.map(ev=>{
+              const stk=getSticker(ev);
+              const st=getStatus(ev);
+              const prepped=ev.items.filter(i=>i.prepped?.trim()).length;
+              const total=ev.items.length;
+              const pct=total>0?Math.round(prepped/total*100):0;
+              const evDate=ev.date?new Date(ev.date+"T00:00:00"):null;
+              const dateStr=evDate?evDate.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"}).toUpperCase():"—";
+              const msUntil=ev.date?(new Date(ev.date+(ev.startTime?"T"+ev.startTime:"T00:00:00"))-new Date()):null;
+              const hoursUntil=msUntil!==null?Math.floor(msUntil/(1000*60*60)):null;
+              const untilLabel=hoursUntil===null?"—":hoursUntil<=0?"Now":hoursUntil<24?`${hoursUntil}h`:`${Math.floor(hoursUntil/24)}d ${hoursUntil%24}h`;
+              const untilColor=hoursUntil===null?"var(--carbon-50)":hoursUntil<=0?"var(--red)":hoursUntil<24?"var(--amber)":"var(--carbon-50)";
+              return(
+                <div key={ev.id} className="ledger-row" onClick={()=>onSelect(ev.id)}>
+                  <span style={{width:10,height:10,borderRadius:99,background:stk.dot,flexShrink:0}}/>
+                  <span style={{fontSize:11,fontWeight:600,letterSpacing:".06em",textTransform:"uppercase",color:"var(--carbon-50)"}}>{dateStr}</span>
+                  <span style={{fontWeight:600,color:"var(--carbon-300)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{ev.name}</span>
+                  <span style={{color:"var(--carbon-50)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{ev.truck||"—"}</span>
+                  <span style={{textAlign:"right",fontSize:15,fontWeight:700,color:"var(--carbon-300)"}}>{ev.guests||"—"}</span>
+                  <span className="ledger-col-prep" style={{display:"flex",alignItems:"center",gap:8}}>
+                    <div style={{flex:1,height:4,background:"var(--carbon-08)",borderRadius:99,overflow:"hidden"}}>
+                      <div style={{width:`${pct}%`,height:"100%",background:stk.bar}}/>
+                    </div>
+                    <span style={{fontSize:11,color:"var(--carbon-50)",minWidth:38,textAlign:"right",fontWeight:600}}>{prepped}/{total}</span>
+                  </span>
+                  <span className="ledger-col-until" style={{textAlign:"right",fontSize:12,fontWeight:700,color:untilColor}}>{untilLabel}</span>
+                  <div className="ledger-col-status" style={{textAlign:"center"}}>{ev.draft?<span className="s-pill" style={{background:"#FEF3C7",color:"#92400E",border:"1px solid #F59E0B"}}>DRAFT</span>:<StatusPillNew status={st}/>}</div>
+                  <div style={{textAlign:"right"}} onClick={e=>e.stopPropagation()}>
+                    <CardMenu evId={ev.id} archived={ev.archived}
+                      onOpen={()=>onSelect(ev.id)}
+                      onDuplicate={()=>onDuplicate(ev.id)}
+                      onArchive={()=>onArchive(ev.id)}
+                      onPrint={()=>onPrint(ev.id)}
+                      onDelete={()=>{if(confirm("Delete this event? This cannot be undone."))onDelete(ev.id);}}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
-        {/* Weather */}
-        {weather&&(
-          <div className="kpi-tile">
-            <div className="kpi-tile-bar" style={{background:"var(--turquesa-500)"}}/>
-            <div className="kpi-tile-inner">
-              <div style={{flex:1,minWidth:0}}>
-                <div className="kpi-label">Outside</div>
-                <div className="kpi-sub">{weather.desc}{weather.wind?` · ${weather.wind} mph`:""}</div>
-              </div>
-              <div style={{display:"flex",alignItems:"center",gap:6}}>
-                <span style={{fontSize:20}}>{weather.icon}</span>
-                <span className="kpi-value">{weather.temp}°</span>
-              </div>
-            </div>
-          </div>
-        )}
-      </aside>
+        {/* RIGHT COLUMN: Up Next & Alerts */}
+        <div className="dash-panel dash-col-right" style={{display:"flex",flexDirection:"column",gap:16}}>
+          
 
-      {/* MAIN FEED */}
-      <div className="cockpit-feed">
-        {/* Filter bar */}
-        <div className="feed-filter-bar">
-          <div className="feed-search-wrap">
-            <span className="feed-search-icon">⌕</span>
-            <input className="feed-search" placeholder="Search events, clients, dishes…" value={search} onChange={e=>setSearch(e.target.value)}/>
-          </div>
-          {["All","In Prep","Prepped","Loaded","Returned"].map(f=>(
-            <button key={f} className={`filter-pill ${statusFilter===f?"on":""}`} onClick={()=>setStatusFilter(f)}>{f}</button>
-          ))}
-        </div>
 
-        {/* Up Next featured card */}
-        {nextEvent&&(()=>{
-          const stk=getSticker(nextEvent);
-          const pct=Math.round((nextPrepped/Math.max(nextTotal,1))*100);
-          const daysUntil=Math.round((new Date(nextEvent.date+"T00:00:00")-new Date())/(1000*60*60*24));
-          const evDate=new Date(nextEvent.date+"T00:00:00");
-          return(
-            <div className="upnext-card" style={{background:stk.soft,border:`1.5px solid ${stk.bar}`,marginBottom:14}}>
-              <div className="upnext-grid">
-                {/* Date col */}
-                <div className="upnext-date-col" style={{borderRight:`1px dashed ${stk.bar}66`}}>
-                  <div style={{fontSize:11,fontWeight:700,letterSpacing:".15em",color:stk.ink,textTransform:"uppercase"}}>
-                    {evDate.toLocaleDateString("en-US",{weekday:"short"})}
-                  </div>
-                  <div style={{fontSize:48,fontWeight:700,letterSpacing:"-.02em",lineHeight:1,color:stk.ink,marginTop:2}}>
-                    {evDate.getDate()}
-                  </div>
-                  {nextEvent.startTime&&<div style={{fontSize:11,fontWeight:600,color:stk.ink,marginTop:2}}>{fmtTime(nextEvent.startTime)}</div>}
-                </div>
-                {/* Title col */}
-                <div>
-                  <div style={{display:"flex",alignItems:"center",gap:8}}>
-                    <span style={{width:9,height:9,borderRadius:99,background:stk.dot,flexShrink:0}}/>
-                    <span style={{fontSize:11,fontWeight:600,letterSpacing:".2em",textTransform:"uppercase",color:stk.ink}}>
-                      Up next · {daysUntil<=0?"today":daysUntil===1?"tomorrow":`in ${daysUntil} days`}
-                    </span>
-                  </div>
-                  <div style={{fontSize:34,fontWeight:700,letterSpacing:"-.02em",color:"var(--carbon-300)",marginTop:4,lineHeight:1.1}}>
-                    {nextEvent.name}
-                  </div>
-                  <div style={{fontFamily:"var(--font-serif)",fontSize:14,color:"var(--carbon-50)",marginTop:3}}>
-                    {nextEvent.truck}
-                  </div>
-                </div>
-                {/* Guests col */}
-                <div>
-                  <div style={{fontSize:10,fontWeight:600,letterSpacing:".15em",textTransform:"uppercase",color:stk.ink}}>Guests</div>
-                  <div style={{fontSize:34,fontWeight:700,letterSpacing:"-.02em",color:"var(--carbon-300)",marginTop:2}}>{nextEvent.guests||"—"}</div>
-                </div>
-                {/* Prepped col */}
-                <div>
-                  <div style={{fontSize:10,fontWeight:600,letterSpacing:".15em",textTransform:"uppercase",color:stk.ink}}>Prepped</div>
-                  <div style={{fontSize:34,fontWeight:700,letterSpacing:"-.02em",color:"var(--carbon-300)",marginTop:2}}>
-                    {nextPrepped}<span style={{color:"var(--carbon-50)",fontSize:20}}>/{nextTotal}</span>
-                  </div>
-                  <div style={{height:3,background:"rgba(0,0,0,.08)",borderRadius:99,marginTop:6,overflow:"hidden"}}>
-                    <div style={{width:`${pct}%`,height:"100%",background:stk.bar}}/>
-                  </div>
-                </div>
-                {/* CTA */}
-                <button style={{background:stk.bar,color:"#fff",border:"none",padding:"12px 16px",borderRadius:6,fontSize:12,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}} onClick={()=>onSelect(nextEvent.id)}>
-                  Open sheet →
-                </button>
-              </div>
-            </div>
-          );
-        })()}
-
-        {/* Alert banner for urgent events */}
-        {(()=>{
-          const urgentEvents=activeEvents.filter(ev=>{
-            if(!ev.date||!ev.startTime)return false;
-            const evStart=new Date(`${ev.date}T${ev.startTime}`);
-            const hoursUntil=(evStart-new Date())/(1000*60*60);
-            return hoursUntil>=0&&hoursUntil<=24&&ev.items.some(i=>!i.prepped?.trim());
-          });
-          if(!urgentEvents.length)return null;
-          return(
-            <div style={{background:"#FFFBEB",border:"1.5px solid #F59E0B",borderRadius:10,padding:"10px 16px",marginBottom:14,display:"flex",alignItems:"flex-start",gap:12}}>
-              <div style={{width:28,height:28,borderRadius:6,background:"#FEF3C7",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:800,color:"#92400E",flexShrink:0}}>!</div>
-              <div style={{flex:1}}>
-                <div style={{fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:".1em",color:"#92400E",marginBottom:5}}>Events starting within 24 hours with unprepped items</div>
-                {urgentEvents.map(ev=>(
-                  <div key={ev.id} style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:3}}>
-                    <span style={{fontSize:13,fontWeight:600,color:"var(--carbon-300)"}}>{ev.name}</span>
-                    <span style={{fontSize:11,color:"#92400E"}}>{ev.items.filter(i=>!i.prepped?.trim()).length} items unprepped</span>
-                    <button style={{fontSize:11,fontWeight:600,padding:"3px 10px",borderRadius:5,border:"1px solid #F59E0B",background:"transparent",color:"#92400E",cursor:"pointer"}} onClick={()=>onSelect(ev.id)}>Open →</button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          );
-        })()}
-
-        {/* Ledger */}
-        <div className="ledger">
-          <div className="ledger-head">
-            <span/><span>Date</span><span>Event</span><span>Location</span>
-            <span style={{textAlign:"right"}}>Guests</span>
-            <span className="ledger-col-prep">Prep</span>
-            <span className="ledger-col-until" style={{textAlign:"right"}}>Until Start</span>
-            <span className="ledger-col-status" style={{textAlign:"center"}}>Status</span>
-            <span style={{textAlign:"right"}}>·</span>
-          </div>
-          {filteredEvents.length===0&&(
-            <EmptyStateWrapper
-              illustration={EmptySearchIllustration}
-              title={search||statusFilter!=="All"?"No Events Found":"No active events"}
-              description={search||statusFilter!=="All"?"No events match your filter.":"No active events. Create one to get started."}
-              color="var(--accent)"
-            />
-          )}
-          {filteredEvents.map(ev=>{
-            const stk=getSticker(ev);
-            const st=getStatus(ev);
-            const prepped=ev.items.filter(i=>i.prepped?.trim()).length;
-            const total=ev.items.length;
-            const pct=total>0?Math.round(prepped/total*100):0;
-            const evDate=ev.date?new Date(ev.date+"T00:00:00"):null;
-            const dateStr=evDate?evDate.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"}).toUpperCase():"—";
-            const msUntil=ev.date?(new Date(ev.date+(ev.startTime?"T"+ev.startTime:"T00:00:00"))-new Date()):null;
-            const hoursUntil=msUntil!==null?Math.floor(msUntil/(1000*60*60)):null;
-            const untilLabel=hoursUntil===null?"—":hoursUntil<=0?"Now":hoursUntil<24?`${hoursUntil}h`:`${Math.floor(hoursUntil/24)}d ${hoursUntil%24}h`;
-            const untilColor=hoursUntil===null?"var(--carbon-50)":hoursUntil<=0?"var(--red)":hoursUntil<24?"var(--amber)":"var(--carbon-50)";
+          {/* Alert banner for urgent events */}
+          {(()=>{
+            const urgentEvents=activeEvents.filter(ev=>{
+              if(!ev.date||!ev.startTime)return false;
+              const evStart=new Date(`${ev.date}T${ev.startTime}`);
+              const hoursUntil=(evStart-new Date())/(1000*60*60);
+              return hoursUntil>=0&&hoursUntil<=24&&ev.items.some(i=>!i.prepped?.trim());
+            });
+            if(!urgentEvents.length)return null;
             return(
-              <div key={ev.id} className="ledger-row" onClick={()=>onSelect(ev.id)}>
-                <span style={{width:10,height:10,borderRadius:99,background:stk.dot,flexShrink:0}}/>
-                <span style={{fontSize:11,fontWeight:600,letterSpacing:".06em",textTransform:"uppercase",color:"var(--carbon-50)"}}>{dateStr}</span>
-                <span style={{fontWeight:600,color:"var(--carbon-300)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{ev.name}</span>
-                <span style={{color:"var(--carbon-50)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{ev.truck||"—"}</span>
-                <span style={{textAlign:"right",fontSize:15,fontWeight:700,color:"var(--carbon-300)"}}>{ev.guests||"—"}</span>
-                <span className="ledger-col-prep" style={{display:"flex",alignItems:"center",gap:8}}>
-                  <div style={{flex:1,height:4,background:"var(--carbon-08)",borderRadius:99,overflow:"hidden"}}>
-                    <div style={{width:`${pct}%`,height:"100%",background:stk.bar}}/>
-                  </div>
-                  <span style={{fontSize:11,color:"var(--carbon-50)",minWidth:38,textAlign:"right",fontWeight:600}}>{prepped}/{total}</span>
-                </span>
-                <span className="ledger-col-until" style={{textAlign:"right",fontSize:12,fontWeight:700,color:untilColor}}>{untilLabel}</span>
-                <div className="ledger-col-status" style={{textAlign:"center"}}>{ev.draft?<span className="s-pill" style={{background:"#FEF3C7",color:"#92400E",border:"1px solid #F59E0B"}}>DRAFT</span>:<StatusPillNew status={st}/>}</div>
-                <div style={{textAlign:"right"}} onClick={e=>e.stopPropagation()}>
-                  <CardMenu evId={ev.id} archived={ev.archived}
-                    onOpen={()=>onSelect(ev.id)}
-                    onDuplicate={()=>onDuplicate(ev.id)}
-                    onArchive={()=>onArchive(ev.id)}
-                    onPrint={()=>onPrint(ev.id)}
-                    onDelete={()=>{if(confirm("Delete this event? This cannot be undone."))onDelete(ev.id);}}
-                  />
+              <div style={{background:"#FFFBEB",border:"1.5px solid #F59E0B",borderRadius:16,padding:"20px",display:"flex",flexDirection:"column",gap:12,boxShadow:"var(--shadow)"}}>
+                <div style={{display:"flex",alignItems:"center",gap:8}}>
+                  <div style={{width:28,height:28,borderRadius:8,background:"#FEF3C7",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,fontWeight:800,color:"#92400E",flexShrink:0}}>!</div>
+                  <div style={{fontSize:12,fontWeight:800,textTransform:"uppercase",letterSpacing:".1em",color:"#92400E"}}>Action Required</div>
+                </div>
+                <div style={{fontSize:13,color:"#92400E",lineHeight:1.4}}>You have events starting within 24 hours that still have unprepped items.</div>
+                <div style={{display:"flex",flexDirection:"column",gap:8,marginTop:8}}>
+                  {urgentEvents.map(ev=>(
+                    <div key={ev.id} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:"#fff",padding:"10px 14px",borderRadius:10,border:"1px solid #FDE68A"}}>
+                      <div>
+                        <div style={{fontSize:13,fontWeight:700,color:"#92400E"}}>{ev.name}</div>
+                        <div style={{fontSize:11,color:"#B45309"}}>{ev.items.filter(i=>!i.prepped?.trim()).length} items unprepped</div>
+                      </div>
+                      <button style={{fontSize:12,fontWeight:700,padding:"6px 12px",borderRadius:8,background:"#FEF3C7",border:"none",color:"#92400E",cursor:"pointer"}} onClick={()=>onSelect(ev.id)}>Open</button>
+                    </div>
+                  ))}
                 </div>
               </div>
             );
-          })}
+          })()}
+
+          {/* Up Next featured card */}
+          {nextEvent&&(()=>{
+            const stk=getSticker(nextEvent);
+            const pct=Math.round((nextPrepped/Math.max(nextTotal,1))*100);
+            const daysUntil=Math.round((new Date(nextEvent.date+"T00:00:00")-new Date())/(1000*60*60*24));
+            const evDate=new Date(nextEvent.date+"T00:00:00");
+            return(
+              <div className="upnext-card" style={{background:stk.soft,border:`1px solid ${stk.bar}`,borderRadius:16,padding:24,boxShadow:"var(--shadow)"}}>
+                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:16}}>
+                  <span style={{width:12,height:12,borderRadius:99,background:stk.dot,flexShrink:0}}/>
+                  <span style={{fontSize:12,fontWeight:700,letterSpacing:".15em",textTransform:"uppercase",color:stk.ink}}>
+                    Up next · {daysUntil<=0?"today":daysUntil===1?"tomorrow":`in ${daysUntil} days`}
+                  </span>
+                </div>
+                
+                <div style={{fontSize:36,fontWeight:800,letterSpacing:"-.02em",color:"var(--carbon-300)",lineHeight:1.1,marginBottom:8}}>
+                  {nextEvent.name}
+                </div>
+                
+                <div style={{display:"flex",gap:16,marginBottom:20}}>
+                  <div>
+                    <div style={{fontSize:11,fontWeight:700,letterSpacing:".1em",textTransform:"uppercase",color:stk.ink,marginBottom:4}}>Date</div>
+                    <div style={{fontSize:15,fontWeight:700,color:"var(--carbon-300)"}}>{evDate.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"})}</div>
+                  </div>
+                  <div>
+                    <div style={{fontSize:11,fontWeight:700,letterSpacing:".1em",textTransform:"uppercase",color:stk.ink,marginBottom:4}}>Guests</div>
+                    <div style={{fontSize:15,fontWeight:700,color:"var(--carbon-300)"}}>{nextEvent.guests||"—"}</div>
+                  </div>
+                </div>
+
+                <div style={{marginBottom:24}}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end",marginBottom:6}}>
+                    <div style={{fontSize:11,fontWeight:700,letterSpacing:".1em",textTransform:"uppercase",color:stk.ink}}>Prep Progress</div>
+                    <div style={{fontSize:16,fontWeight:800,color:"var(--carbon-300)"}}>{nextPrepped}<span style={{color:"var(--carbon-50)",fontSize:13}}>/{nextTotal}</span></div>
+                  </div>
+                  <div style={{height:6,background:"rgba(0,0,0,.06)",borderRadius:99,overflow:"hidden"}}>
+                    <div style={{width:`${pct}%`,height:"100%",background:stk.bar}}/>
+                  </div>
+                </div>
+
+                <button style={{width:"100%",background:stk.bar,color:"#fff",border:"none",padding:"14px 16px",borderRadius:12,fontSize:14,fontWeight:700,cursor:"pointer"}} onClick={()=>onSelect(nextEvent.id)}>
+                  Open Prep Sheet →
+                </button>
+              </div>
+            );
+          })()}
+
         </div>
       </div>
     </div>

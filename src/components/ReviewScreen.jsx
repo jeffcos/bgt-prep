@@ -18,35 +18,30 @@ export default function ReviewScreen({event,selections,calcItems,ING,RECIPES,onG
   const nonEmpty=GROUP_ORDER.filter(g=>byGroup[g].length>0);
 
   const canGenerate=!event.notes||ackAllergy;
-
   return(
-    <div className="wiz-layout">
-      {/* Rail */}
-      <aside className="wiz-rail">
-        <div className="wiz-eyebrow">New event</div>
-        <div className="wiz-heading">Review the <em>prep.</em></div>
-        <StepRail current={2}/>
-        {/* What happens next card */}
-        <div style={{background:"#fff",border:"1px solid var(--carbon-08)",borderRadius:10,padding:"14px 16px"}}>
-          <div style={{fontSize:10,fontWeight:700,letterSpacing:".14em",textTransform:"uppercase",color:"var(--carbon-50)",marginBottom:8}}>What happens next</div>
-          {["Prep sheet is created with all calculated quantities","Quantities can be adjusted on the sheet","Print or share with your team","Track prepped, loaded, and returned"].map((t,i)=>(
-            <div key={i} style={{display:"flex",gap:8,alignItems:"flex-start",marginBottom:6}}>
-              <div style={{width:16,height:16,borderRadius:"50%",background:"var(--cactus-50)",border:"1px solid var(--cactus-200)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:800,color:"var(--cactus-500)",flexShrink:0,marginTop:1}}>{i+1}</div>
-              <div style={{fontSize:12,color:"var(--carbon-200)",lineHeight:1.4}}>{t}</div>
-            </div>
-          ))}
-        </div>
-        <div className="wiz-footer">Quantities are calculated per single serving and rounded up to whole containers.</div>
-      </aside>
+    <div className="wiz-layout-single">
+      <StepRail current={2}/>
 
-      {/* Main */}
-      <main className="wiz-main">
+      <div style={{width:"100%"}}>
         <div className="wiz-hdr">
           <div>
             <div className="wiz-step-eyebrow">Step 3 of 3</div>
-            <div className="wiz-title">Review & generate</div>
+            <div className="wiz-title">Review &amp; generate</div>
           </div>
           <button className="btn btn-secondary" onClick={onCancel}>Cancel</button>
+        </div>
+
+        {/* What happens next */}
+        <div className="wiz-card" style={{background:"var(--cactus-50)",border:"1px solid var(--cactus-100)",padding:"20px 24px",marginBottom:20}}>
+          <div style={{fontSize:10,fontWeight:700,letterSpacing:".14em",textTransform:"uppercase",color:"var(--cactus-700)",marginBottom:12}}>What happens next</div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
+            {["Prep sheet is created with all calculated quantities","Quantities can be adjusted on the sheet","Print or share with your team","Track prepped, loaded, and returned"].map((t,i)=>(
+              <div key={i} style={{display:"flex",gap:10,alignItems:"flex-start"}}>
+                <div style={{width:20,height:20,borderRadius:"50%",background:"#fff",border:"1.5px solid var(--cactus-400)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:800,color:"var(--cactus-500)",flexShrink:0,marginTop:1}}>{i+1}</div>
+                <div style={{fontSize:13,color:"var(--carbon-50)",lineHeight:1.4}}>{t}</div>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* ① Event recap */}
@@ -149,7 +144,7 @@ export default function ReviewScreen({event,selections,calcItems,ING,RECIPES,onG
             Generate prep sheet →
           </button>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

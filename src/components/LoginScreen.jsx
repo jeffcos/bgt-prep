@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase";
+import logoImg from "../assets/logo.jpg";
 
 export default function LoginScreen(){
   const [email,setEmail]=useState("");
@@ -35,8 +36,18 @@ export default function LoginScreen(){
       <div style={{width:380}}>
         {/* Logo */}
         <div style={{textAlign:"center",marginBottom:36}}>
-          <div style={{width:52,height:52,borderRadius:"50%",background:"var(--clay-500)",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 14px",color:"#fff",fontSize:18,fontWeight:800,letterSpacing:".02em"}}>BG</div>
-          <div style={{fontSize:20,fontWeight:800,letterSpacing:".12em",textTransform:"uppercase",color:"var(--clay-500)"}}>Border Grill</div>
+          <img 
+            src={logoImg} 
+            alt="Border Grill" 
+            style={{ 
+              height: "32px", 
+              width: "auto", 
+              margin: "0 auto 10px", 
+              display: "block",
+              mixBlendMode: "multiply",
+              objectFit: "contain"
+            }} 
+          />
           <div style={{fontSize:11,fontWeight:600,letterSpacing:".18em",textTransform:"uppercase",color:"var(--carbon-50)",marginTop:4}}>Truck + Catering · Prep System</div>
         </div>
 

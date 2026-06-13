@@ -18,7 +18,6 @@ function Chip({ev,onSelect}){
 export default function CalendarView({events,onSelect}){
   const [calView,setCalView]=useState("month");
   const [anchor,setAnchor]=useState(()=>{const d=new Date();d.setHours(0,0,0,0);return d;});
-  const [statusFilter,setStatusFilter]=useState([]);
   const [search,setSearch]=useState("");
 
   const isSameDay=(a,b)=>a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();
@@ -65,7 +64,6 @@ export default function CalendarView({events,onSelect}){
 
   const filteredEvents=activeEvents.filter(ev=>{
     if(search&&!ev.name?.toLowerCase().includes(search.toLowerCase()))return false;
-    if(statusFilter.length&&!statusFilter.includes(getStatus(ev)))return false;
     return true;
   });
 
@@ -73,57 +71,38 @@ export default function CalendarView({events,onSelect}){
   const upcoming=monthEvs.filter(ev=>{const d=evDate(ev);return d&&d>=today;}).length;
   const wrapped=monthEvs.filter(ev=>{const d=evDate(ev);return d&&d<today;}).length;
 
-  const toggleStatus=s=>setStatusFilter(prev=>prev.includes(s)?prev.filter(x=>x!==s):[...prev,s]);
 
   return(
     <div className="sch-layout">
-      {/* SIDEBAR */}
-      <aside className="sch-sidebar">
-        <div className="sch-eyebrow">Schedule</div>
-        <div className="sch-heading">
-          <div className="sch-month-name">{monthLabel()}</div>
-          <div className="sch-year-name">{yearLabel()}.</div>
-        </div>
-
-        <div className="sch-nav">
-          <button className="sch-nav-btn" onClick={calView==="week"?prevWeek:prevMonth}>‹ {adjMonthLabel(-1)}</button>
-          <button className="sch-nav-btn sch-nav-today" onClick={goToday}>{new Date().toLocaleDateString("en-US",{month:"short"})}</button>
-          <button className="sch-nav-btn" onClick={calView==="week"?nextWeek:nextMonth}>{adjMonthLabel(1)} ›</button>
-        </div>
-
-        <div>
-          <div className="sch-section-label">View</div>
-          <div className="sch-view-btns">
-            {["month","week","list"].map(v=>(
-              <button key={v} className={`sch-view-btn ${calView===v?"active":""}`} onClick={()=>setCalView(v)}>
-                {v.charAt(0).toUpperCase()+v.slice(1)}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <div className="sch-section-label">Status</div>
-          <div className="sch-status-pills">
-            {[{key:"prep",label:"In Prep"},{key:"prepped",label:"Prepped"},{key:"loaded",label:"Loaded"},{key:"returned",label:"Returned"}].map(s=>(
-              <button key={s.key} className={`sch-status-pill ${statusFilter.includes(s.key)?"active":""}`} onClick={()=>toggleStatus(s.key)}>
-                {s.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </aside>
-
       {/* MAIN */}
-      <div className="sch-main">
-        <div className="sch-main-hdr">
+      <div className="sch-main" style={{padding: "40px 60px", maxWidth: 1400, margin: "0 auto"}}>
+        <div className="sch-main-hdr" style={{display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom: 32}}>
           <div>
             <div className="sch-main-title">{monthLabel()} {yearLabel()}</div>
             <div className="sch-main-sub">{upcoming} upcoming · {wrapped} wrapped this month</div>
           </div>
-          <div className="sch-search-wrap">
-            <span className="sch-search-icon">⌕</span>
-            <input className="sch-search" placeholder="Search events…" value={search} onChange={e=>setSearch(e.target.value)}/>
+          
+          <div style={{display:"flex", flexDirection:"column", alignItems:"flex-end", gap: 12}}>
+            <div className="sch-search-wrap" style={{position:"relative", width:"100%"}}>
+              <span className="sch-search-icon" style={{position:"absolute", left:12, top:"50%", transform:"translateY(-50%)", color:"var(--muted)"}}>⌕</span>
+              <input className="sch-search" style={{width:"100%", boxSizing:"border-box", padding:"8px 14px 8px 34px", border:"1px solid var(--border)", borderRadius:20, background:"var(--card)", fontSize:13, color:"var(--text)", outline:"none"}} placeholder="Search events…" value={search} onChange={e=>setSearch(e.target.value)}/>
+            </div>
+            
+            <div style={{display:"flex", alignItems:"center", gap: 16}}>
+              <div className="sch-nav" style={{display:"flex", gap: 4}}>
+                <button className="sch-nav-btn" onClick={calView==="week"?prevWeek:prevMonth}>‹ {adjMonthLabel(-1)}</button>
+                <button className="sch-nav-btn sch-nav-today" onClick={goToday}>{new Date().toLocaleDateString("en-US",{month:"short"})}</button>
+                <button className="sch-nav-btn" onClick={calView==="week"?nextWeek:nextMonth}>{adjMonthLabel(1)} ›</button>
+              </div>
+              
+              <div className="sch-view-btns" style={{display:"flex", gap: 4, background:"var(--card)", padding: 4, borderRadius: 12, border:"1px solid var(--border)"}}>
+                {["month","week","list"].map(v=>(
+                  <button key={v} className={`sch-view-btn ${calView===v?"active":""}`} onClick={()=>setCalView(v)} style={{padding:"6px 12px", border:"none", borderRadius:8, background:calView===v?"var(--bg)":"transparent", color:calView===v?"var(--text)":"var(--muted)", fontWeight:600, fontSize:12, cursor:"pointer", transition:"all .15s", boxShadow:calView===v?"0 1px 3px rgba(0,0,0,.08)":"none"}}>
+                    {v.charAt(0).toUpperCase()+v.slice(1)}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 

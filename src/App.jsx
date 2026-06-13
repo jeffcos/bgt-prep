@@ -92,26 +92,46 @@ function StaffApp({events,ops,ING,RECIPES,onGear,userName,userEmail,isOwner,isMg
   };
 
   return(
-    <>
-      <header className="nav-new glass-panel">
-        <Logo onClick={()=>setView("dashboard")}/>
-        <nav className="nav-items-new">
+    <div className="app-layout">
+      <aside className="app-sidebar glass-panel">
+        <div className="sidebar-logo">
+          <Logo onClick={()=>setView("dashboard")}/>
+        </div>
+        <nav className="sidebar-nav">
           {[
-            {v:"dashboard",l:"Dashboard"},
-            {v:"calendar",l:"Calendar"},
-            ...((view==="sheet"||view==="menu")?[{v:"sheet",l:"Sheet"},{v:"menu",l:"Menu"}]:[]),
-            ...((view==="sheet"||view==="menu")?[]:[{v:"past",l:"Past Events"}]),
-          ].map(({v,l})=>(
-            <button key={v} className={`nav-item-new ${view===v?"on":""}`} onClick={()=>setView(v)}>{l}</button>
+            {v:"dashboard",l:"Dashboard",icon:"❖"},
+            {v:"calendar",l:"Calendar",icon:"📅"},
+            ...((view==="sheet"||view==="menu")?[{v:"sheet",l:"Prep Sheet",icon:"📋"},{v:"menu",l:"Menu Builder",icon:"🍴"}]:[]),
+            ...(isMgr ? [
+              {v:"clients",l:"Clients",icon:"👥",stub:true},
+              {v:"logistics",l:"Logistics",icon:"🚚",stub:true},
+              {v:"staff",l:"Staff",icon:"🧑‍🍳",stub:true},
+            ] : []),
+            ...((view==="sheet"||view==="menu")?[]:[{v:"past",l:"Past Events",icon:"📁"}]),
+            ...(isMgr ? [
+              {v:"reports",l:"Reports",icon:"📊",stub:true},
+              {v:"settings",l:"Settings",icon:"⚙️",stub:true},
+            ] : []),
+          ].map(({v,l,icon,stub})=>(
+            <button key={v} className={`sidebar-nav-item ${view===v?"on":""}`} style={{opacity:stub?0.5:1}} onClick={()=>{if(!stub)setView(v);}}>
+              <span style={{marginRight:12,fontSize:16,width:20,textAlign:"center"}}>{icon}</span> {l}
+            </button>
           ))}
         </nav>
-        <div className="nav-right-new">
-          <div className="avatar-menu-wrap" ref={userMenuRef}>
-            <div className={`avatar-new${showUserMenu?" avatar-active":""}`} style={{cursor:"pointer"}} onClick={()=>setShowUserMenu(v=>!v)}>
-              {userName?userName.trim().split(/\s+/).map(w=>w[0].toUpperCase()).slice(0,2).join(""):"?"}
+        <div className="sidebar-footer">
+          <div className="avatar-menu-wrap" ref={userMenuRef} style={{width:"100%"}}>
+            <div className={`avatar-new${showUserMenu?" avatar-active":""}`} style={{cursor:"pointer",width:"100%",borderRadius:12,justifyContent:"flex-start",padding:"8px 12px",background:showUserMenu?"rgba(0,0,0,.08)":"transparent"}} onClick={()=>setShowUserMenu(v=>!v)}>
+              <div style={{width:32,height:32,borderRadius:99,background:"var(--carbon-300)",color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",marginRight:10,flexShrink:0}}>
+                {userName?userName.trim().split(/\s+/).map(w=>w[0].toUpperCase()).slice(0,2).join(""):"?"}
+              </div>
+              <div style={{flex:1,textAlign:"left",overflow:"hidden"}}>
+                <div style={{fontSize:13,fontWeight:700,color:"var(--carbon-300)",whiteSpace:"nowrap",textOverflow:"ellipsis"}}>{userName||"User"}</div>
+                <div style={{fontSize:11,color:"var(--carbon-50)",whiteSpace:"nowrap",textOverflow:"ellipsis"}}>{isMgr?"Manager":"Staff"}</div>
+              </div>
+              <div style={{color:"var(--carbon-50)"}}>⋮</div>
             </div>
             {showUserMenu&&(
-              <div className="user-dropdown">
+              <div className="user-dropdown" style={{bottom:"100%",top:"auto",marginBottom:8,left:0,width:"100%"}}>
                 <div className="user-dropdown-header">
                   <div className="user-dropdown-name">{userName||"User"}</div>
                 </div>
@@ -127,7 +147,9 @@ function StaffApp({events,ops,ING,RECIPES,onGear,userName,userEmail,isOwner,isMg
             )}
           </div>
         </div>
-      </header>
+      </aside>
+
+      <main className="app-main">
 
       {view==="dashboard"&&(
         <Dashboard
@@ -142,16 +164,9 @@ function StaffApp({events,ops,ING,RECIPES,onGear,userName,userEmail,isOwner,isMg
       )}
 
       {view==="create"&&(
-        <div className="wiz-layout">
-          <aside className="wiz-rail">
-            <div className="wiz-eyebrow">New event</div>
-            <div className="wiz-heading">Set the <em>basics.</em></div>
-            <StepRail current={0}/>
-            <div className="wiz-footer">All fields can be edited later from the prep sheet.</div>
-          </aside>
-          <main className="wiz-main">
-            <EventForm onSubmit={handleCreate} onCancel={()=>setView("dashboard")}/>
-          </main>
+        <div className="wiz-layout-single">
+          <StepRail current={0}/>
+          <EventForm onSubmit={handleCreate} onCancel={()=>setView("dashboard")}/>
         </div>
       )}
 
@@ -215,7 +230,8 @@ function StaffApp({events,ops,ING,RECIPES,onGear,userName,userEmail,isOwner,isMg
           onClose={()=>setShowEditModal(false)}
         />
       )}
-    </>
+      </main>
+    </div>
   );
 }
 
