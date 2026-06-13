@@ -129,12 +129,6 @@ function StaffApp({events,ops,ING,RECIPES,userName,userEmail,isOwner,isMgr,onSig
                 sidebarItems.push({ v: "audit", l: "Audit Log", icon: "📜" });
                 sidebarItems.push({ v: "recycle", l: "Recycle Bin", icon: "🗑️" });
               }
-              sidebarItems.push({ type: "header", l: "Management" });
-              sidebarItems.push({ v: "clients", l: "Clients", icon: "👥", stub: true });
-              sidebarItems.push({ v: "logistics", l: "Logistics", icon: "🚚", stub: true });
-              sidebarItems.push({ v: "staff", l: "Staff", icon: "🧑‍🍳", stub: true });
-              sidebarItems.push({ v: "reports", l: "Reports", icon: "📊", stub: true });
-              sidebarItems.push({ v: "settings", l: "Settings", icon: "⚙️", stub: true });
             }
             return sidebarItems.map((item, idx) => {
               if (item.type === "header") {
@@ -170,12 +164,7 @@ function StaffApp({events,ops,ING,RECIPES,userName,userEmail,isOwner,isMgr,onSig
                 <div className="user-dropdown-header">
                   <div className="user-dropdown-name">{userName||"User"}</div>
                 </div>
-                {isMgr&&(
-                  <>
-                    <div className="user-dropdown-divider"/>
-                    <button className="user-dropdown-item" onClick={()=>{setShowUserMenu(false);setView("recipes");}}>⚙ Admin panel</button>
-                  </>
-                )}
+
                 <div className="user-dropdown-divider"/>
                 <button className="user-dropdown-item user-dropdown-signout" onClick={()=>{setShowUserMenu(false);onSignOut();}}>↪ Sign out</button>
               </div>
