@@ -87,6 +87,23 @@ input,select,button,textarea{font-family:inherit;}
   flex-direction: column;
   gap: 8px;
   flex: 1;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.sidebar-nav::-webkit-scrollbar {
+  display: none;
+}
+.sidebar-section-header {
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  margin: 16px 12px 6px;
+  opacity: 0.8;
+}
+.sidebar-section-header:first-of-type {
+  margin-top: 0;
 }
 .sidebar-nav-item {
   background: transparent;

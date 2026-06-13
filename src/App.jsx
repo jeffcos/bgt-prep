@@ -19,11 +19,13 @@ import { EventForm } from './components/EventForm';
 import StepRail from './components/StepRail';
 import ReviewScreen from './components/ReviewScreen';
 import PastEvents from './components/PastEvents';
-import MgrApp from './components/MgrApp';
+import { RecipeList, RecipeEditor, IngredientManager, GuideView, RecycleBinView } from './components/MgrApp';
+import UserManagement from './components/UserManagement';
+import AuditLog from './components/AuditLog';
 import { PrintModal, EditEventModal } from './components/modals';
 
 // ─── STAFF APP ───
-function StaffApp({events,ops,ING,RECIPES,onGear,userName,userEmail,isOwner,isMgr,onSignOut}){
+function StaffApp({events,ops,ING,RECIPES,userName,userEmail,isOwner,isMgr,onSignOut,devData,mutDev,userProfile,currentUserId}){
   const [view,setView]=useState("dashboard");
   const [activeId,setActiveId]=useState(null);
   const [pendingSelections,setPendingSelections]=useState([]);
@@ -32,7 +34,14 @@ function StaffApp({events,ops,ING,RECIPES,onGear,userName,userEmail,isOwner,isMg
   const [showEditModal,setShowEditModal]=useState(false);
   const [printMode,setPrintMode]=useState(null);
   const [showUserMenu,setShowUserMenu]=useState(false);
+  const [editingRecipe,setEditingRecipe]=useState(null);
   const userMenuRef=useRef(null);
+
+  const saveRecipe=(key,recipe)=>{mutDev(p=>({...p,customRecipes:{...p.customRecipes,[key]:recipe}}));setEditingRecipe(null);};
+  const deleteRecipe=key=>{mutDev(p=>{const cr={...p.customRecipes};delete cr[key];return{...p,customRecipes:cr};}); };
+  const saveIngredient=(name,cfg)=>mutDev(p=>({...p,customIngredients:{...p.customIngredients,[name]:cfg}}));
+  const updateIngredient=(oldName,newName,cfg)=>{mutDev(p=>{const ci={...p.customIngredients};if(oldName!==newName)delete ci[oldName];ci[newName]=cfg;return{...p,customIngredients:ci};});};
+  const deleteIngredient=name=>{mutDev(p=>{const ci={...p.customIngredients};delete ci[name];return{...p,customIngredients:ci};});};
 
   useEffect(()=>{
     if(!showUserMenu)return;
@@ -98,25 +107,51 @@ function StaffApp({events,ops,ING,RECIPES,onGear,userName,userEmail,isOwner,isMg
           <Logo onClick={()=>setView("dashboard")}/>
         </div>
         <nav className="sidebar-nav">
-          {[
-            {v:"dashboard",l:"Dashboard",icon:"❖"},
-            {v:"calendar",l:"Calendar",icon:"📅"},
-            ...((view==="sheet"||view==="menu")?[{v:"sheet",l:"Prep Sheet",icon:"📋"},{v:"menu",l:"Menu Builder",icon:"🍴"}]:[]),
-            ...(isMgr ? [
-              {v:"clients",l:"Clients",icon:"👥",stub:true},
-              {v:"logistics",l:"Logistics",icon:"🚚",stub:true},
-              {v:"staff",l:"Staff",icon:"🧑‍🍳",stub:true},
-            ] : []),
-            ...((view==="sheet"||view==="menu")?[]:[{v:"past",l:"Past Events",icon:"📁"}]),
-            ...(isMgr ? [
-              {v:"reports",l:"Reports",icon:"📊",stub:true},
-              {v:"settings",l:"Settings",icon:"⚙️",stub:true},
-            ] : []),
-          ].map(({v,l,icon,stub})=>(
-            <button key={v} className={`sidebar-nav-item ${view===v?"on":""}`} style={{opacity:stub?0.5:1}} onClick={()=>{if(!stub)setView(v);}}>
-              <span style={{marginRight:12,fontSize:16,width:20,textAlign:"center"}}>{icon}</span> {l}
-            </button>
-          ))}
+          {(() => {
+            const sidebarItems = [];
+            sidebarItems.push({ type: "header", l: "Operations" });
+            sidebarItems.push({ v: "dashboard", l: "Dashboard", icon: "❖" });
+            sidebarItems.push({ v: "calendar", l: "Calendar", icon: "📅" });
+            if (view === "sheet" || view === "menu" || view === "review") {
+              sidebarItems.push({ v: "sheet", l: "Prep Sheet", icon: "📋" });
+              sidebarItems.push({ v: "menu", l: "Menu Builder", icon: "🍴" });
+            } else {
+              sidebarItems.push({ v: "past", l: "Past Events", icon: "📁" });
+            }
+            if (isMgr) {
+              sidebarItems.push({ type: "header", l: "Database" });
+              sidebarItems.push({ v: "recipes", l: "Recipes", icon: "📖" });
+              sidebarItems.push({ v: "ingredients", l: "Ingredients", icon: "🧂" });
+              sidebarItems.push({ v: "guide", l: "Guide", icon: "📘" });
+              if (isOwner) {
+                sidebarItems.push({ type: "header", l: "Admin" });
+                sidebarItems.push({ v: "team", l: "Team", icon: "👥" });
+                sidebarItems.push({ v: "audit", l: "Audit Log", icon: "📜" });
+                sidebarItems.push({ v: "recycle", l: "Recycle Bin", icon: "🗑️" });
+              }
+              sidebarItems.push({ type: "header", l: "Management" });
+              sidebarItems.push({ v: "clients", l: "Clients", icon: "👥", stub: true });
+              sidebarItems.push({ v: "logistics", l: "Logistics", icon: "🚚", stub: true });
+              sidebarItems.push({ v: "staff", l: "Staff", icon: "🧑‍🍳", stub: true });
+              sidebarItems.push({ v: "reports", l: "Reports", icon: "📊", stub: true });
+              sidebarItems.push({ v: "settings", l: "Settings", icon: "⚙️", stub: true });
+            }
+            return sidebarItems.map((item, idx) => {
+              if (item.type === "header") {
+                return (
+                  <div key={`hdr-${idx}`} className="sidebar-section-header">
+                    {item.l}
+                  </div>
+                );
+              }
+              const { v, l, icon, stub } = item;
+              return (
+                <button key={v} className={`sidebar-nav-item ${view===v?"on":""}`} style={{opacity:stub?0.5:1}} onClick={()=>{if(!stub) { setEditingRecipe(null); setView(v); }}}>
+                  <span style={{marginRight:12,fontSize:16,width:20,textAlign:"center"}}>{icon}</span> {l}
+                </button>
+              );
+            });
+          })()}
         </nav>
         <div className="sidebar-footer">
           <div className="avatar-menu-wrap" ref={userMenuRef} style={{width:"100%"}}>
@@ -135,10 +170,10 @@ function StaffApp({events,ops,ING,RECIPES,onGear,userName,userEmail,isOwner,isMg
                 <div className="user-dropdown-header">
                   <div className="user-dropdown-name">{userName||"User"}</div>
                 </div>
-                {isMgr&&onGear&&(
+                {isMgr&&(
                   <>
                     <div className="user-dropdown-divider"/>
-                    <button className="user-dropdown-item" onClick={()=>{setShowUserMenu(false);onGear();}}>⚙ Admin panel</button>
+                    <button className="user-dropdown-item" onClick={()=>{setShowUserMenu(false);setView("recipes");}}>⚙ Admin panel</button>
                   </>
                 )}
                 <div className="user-dropdown-divider"/>
@@ -220,6 +255,45 @@ function StaffApp({events,ops,ING,RECIPES,onGear,userName,userEmail,isOwner,isMg
           events={events.filter(ev=>!ev.archived&&!ev.deleted)}
           onSelect={goToSheet}
         />
+      )}
+
+      {view==="recipes"&&(
+        <div className="wrap" style={{maxWidth:"none",width:"100%"}}>
+          {editingRecipe?
+            <RecipeEditor recipeKey={editingRecipe==="new"?null:editingRecipe} recipe={editingRecipe==="new"?null:RECIPES[editingRecipe]} ING={ING} onSave={saveRecipe} onDelete={isOwner&&editingRecipe!=="new"?()=>{deleteRecipe(editingRecipe);setEditingRecipe(null);}:null} onCancel={()=>setEditingRecipe(null)} isOwner={isOwner} events={events}/>:
+            <RecipeList RECIPES={RECIPES} customKeys={Object.keys(devData.customRecipes)} onEdit={setEditingRecipe} onNew={()=>setEditingRecipe("new")} onDelete={key=>{deleteRecipe(key);setEditingRecipe(null);}} isOwner={isOwner} events={events}/>
+          }
+        </div>
+      )}
+
+      {view==="ingredients"&&(
+        <div className="wrap" style={{maxWidth:"none",width:"100%"}}>
+          <IngredientManager ING={ING} customKeys={Object.keys(devData.customIngredients||{})} onSave={saveIngredient} onUpdate={updateIngredient} onDelete={deleteIngredient} isOwner={isOwner} RECIPES={RECIPES}/>
+        </div>
+      )}
+
+      {view==="guide"&&(
+        <div className="wrap">
+          <GuideView/>
+        </div>
+      )}
+
+      {view==="team"&&isOwner&&(
+        <div className="wrap" style={{maxWidth:"none",width:"100%"}}>
+          <UserManagement currentUserId={currentUserId}/>
+        </div>
+      )}
+
+      {view==="audit"&&isOwner&&(
+        <div className="wrap" style={{maxWidth:"none",width:"100%"}}>
+          <AuditLog/>
+        </div>
+      )}
+
+      {view==="recycle"&&isOwner&&(
+        <div className="wrap" style={{maxWidth:"none",width:"100%"}}>
+          <RecycleBinView events={events} ops={ops}/>
+        </div>
       )}
 
       {showPrintModal&&<PrintModal onClose={()=>setShowPrintModal(false)} onPrint={setPrintMode}/>}
@@ -459,24 +533,13 @@ export default function App(){
   if(!user)return<LoginScreen/>;
 
   return(
-    <>
-      {showMgr&&isMgr?(
-        <MgrApp
-          devData={devData} mutDev={mutDev} ING={ING} RECIPES={RECIPES}
-          onExit={()=>setShowMgr(false)}
-          isOwner={isOwner} events={events} ops={ops}
-          onSignOut={()=>signOut(auth)}
-          userProfile={userProfile}
-          currentUserId={user?.uid||""}
-        />
-      ):(
-        <StaffApp
-          events={events} ops={ops} ING={ING} RECIPES={RECIPES}
-          onGear={isMgr?()=>setShowMgr(true):null}
-          userName={userName} userEmail={userEmail} isOwner={isOwner} isMgr={isMgr}
-          onSignOut={()=>signOut(auth)}
-        />
-      )}
-    </>
+    <StaffApp
+      events={events} ops={ops} ING={ING} RECIPES={RECIPES}
+      userName={userName} userEmail={userEmail} isOwner={isOwner} isMgr={isMgr}
+      onSignOut={()=>signOut(auth)}
+      devData={devData} mutDev={mutDev}
+      userProfile={userProfile}
+      currentUserId={user?.uid||""}
+    />
   );
 }
