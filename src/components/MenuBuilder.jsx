@@ -91,48 +91,48 @@ export default function MenuBuilder({event,RECIPES,ING,onApply,onSkip,onBack}){
   };
 
   return(
-    <div className="wiz-layout-single" style={{maxWidth:1100}}>
+    <div className="max-w-[1100px] w-full mx-auto pb-12">
       <StepRail current={1}/>
 
-      <div style={{display:"grid",gridTemplateColumns:"1fr 340px",gap:24,width:"100%",alignItems:"start"}}>
+      <div className="grid grid-cols-[1fr_340px] gap-6 w-full items-start">
         {/* LEFT COLUMN: Categories & Dishes */}
-        <div style={{background:"var(--card)",border:"1px solid var(--border)",borderRadius:16,boxShadow:"var(--shadow)",overflow:"hidden"}}>
+        <div className="bg-white border border-bd rounded-2xl shadow-custom overflow-hidden">
           {/* Header */}
-          <div style={{padding:"24px 24px 16px",borderBottom:"1px solid var(--carbon-08)",background:"rgba(255,255,255,0.5)",backdropFilter:"blur(8px)"}}>
+          <div className="px-6 pt-6 pb-4 border-b border-carbon-08 bg-white/50 backdrop-blur-md">
             {/* Title row */}
-            <div className="wiz-hdr" style={{marginBottom:14,alignItems:"flex-end"}}>
+            <div className="flex items-end justify-between mb-3.5">
               <div>
-                <div className="wiz-step-eyebrow">Step 2 of 3 · For {event.name||"new event"}</div>
-                <div className="wiz-title" style={{fontSize:28}}>Pick dishes &amp; set covers</div>
+                <div className="text-[10px] font-extrabold text-[#E08A75] uppercase tracking-[.15em] mb-1.5">Step 2 of 3 · For {event.name||"new event"}</div>
+                <div className="text-[28px] font-extrabold text-carbon-300 leading-tight tracking-[-.02em]">Pick dishes &amp; set covers</div>
               </div>
-              <div style={{display:"flex",gap:8}}>
-                <button className="btn btn-secondary" onClick={onBack}>← Back</button>
-                <button className="btn btn-primary" onClick={handleApply}>Review →</button>
+              <div className="flex gap-2">
+                <button className="bg-white border border-[#D4CCC2] text-carbon-300 px-4 py-2 rounded-xl text-xs font-bold cursor-pointer hover:bg-black/5 shadow-sm transition-colors" onClick={onBack}>← Back</button>
+                <button className="bg-[#E08A75] text-white border-none px-4 py-2 rounded-xl text-xs font-bold cursor-pointer hover:opacity-90 shadow-sm transition-colors" onClick={handleApply}>Review →</button>
               </div>
             </div>
             {/* Search + Skip */}
-            <div style={{display:"flex",gap:10,alignItems:"center"}}>
-              <div style={{position:"relative",flex:1}}>
-                <span style={{position:"absolute",left:14,top:"50%",transform:"translateY(-50%)",color:"var(--carbon-50)",fontSize:16}}>⌕</span>
-                <input style={{width:"100%",padding:"11px 14px 11px 38px",border:"1px solid var(--carbon-20)",borderRadius:8,background:"#fff",fontSize:13,fontFamily:"inherit",outline:"none"}} placeholder="Search dishes…" value={search} onChange={e=>setSearch(e.target.value)}/>
+            <div className="flex gap-2.5 items-center">
+              <div className="relative flex-1">
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-carbon-50 text-base">⌕</span>
+                <input className="w-full py-2.5 pr-3.5 pl-9 border border-carbon-20 rounded-lg bg-white text-[13px] outline-none focus:border-[#E08A75] transition-colors" placeholder="Search dishes…" value={search} onChange={e=>setSearch(e.target.value)}/>
               </div>
-              <button className="btn btn-secondary" style={{whiteSpace:"nowrap",flexShrink:0}} onClick={onSkip}>Skip — Build Manually</button>
+              <button className="whitespace-nowrap shrink-0 bg-white border border-[#D4CCC2] text-carbon-300 px-4 py-2 rounded-xl text-xs font-bold cursor-pointer hover:bg-black/5 shadow-sm transition-colors" onClick={onSkip}>Skip — Build Manually</button>
             </div>
           </div>
 
           {/* Dish list area */}
-          <div style={{padding:"20px 24px",maxHeight:"calc(100vh - 280px)",overflowY:"auto"}}>
+          <div className="p-6 max-h-[calc(100vh-280px)] overflow-y-auto bg-bg">
             {RECIPE_CATS.filter(cat=>(filteredBycat[cat]||[]).length>0).map(cat=>{
               const dishes=filteredBycat[cat]||[];
               const selCount=dishes.filter(({key})=>qtys[key]>0).length;
               const covers=dishes.reduce((s,{key})=>s+(parseInt(qtys[key]||0)),0);
               const r0=dishes[0]?.r;
               return(
-                <div key={cat} style={{background:"#fff",border:"1px solid var(--carbon-08)",borderRadius:10,overflow:"hidden",marginBottom:12}}>
+                <div key={cat} className="bg-white border border-carbon-08 rounded-xl overflow-hidden mb-3 shadow-[0_2px_4px_rgba(0,0,0,.02)]">
                   {/* Category header */}
-                  <div style={{padding:"10px 18px",borderBottom:"1px solid var(--carbon-08)",background:RCAT_COLORS[cat]||"#374151",display:"flex",alignItems:"baseline",gap:14}}>
-                    <div style={{fontSize:12,fontWeight:800,letterSpacing:".12em",textTransform:"uppercase",color:"#fff"}}>{cat}</div>
-                    <div style={{fontSize:11,color:"rgba(255,255,255,.65)",letterSpacing:".03em"}}>
+                  <div className="px-4 py-2.5 flex items-baseline gap-3" style={{background:RCAT_COLORS[cat]||"#374151"}}>
+                    <div className="text-xs font-extrabold tracking-[.12em] uppercase text-white">{cat}</div>
+                    <div className="text-[11px] text-white/70 tracking-[.03em] font-medium">
                       {selCount}/{dishes.length} chosen · {covers} covers{r0?.servingWord?` · per ${r0.servingWord}`:""}
                     </div>
                   </div>
@@ -144,37 +144,37 @@ export default function MenuBuilder({event,RECIPES,ING,onApply,onSkip,onBack}){
                     return(
                       <div key={key}>
                         {/* Main row */}
-                        <div style={{display:"grid",gridTemplateColumns:"22px 1fr 1fr 150px 28px",padding:"12px 18px",borderTop:i>0?"1px solid var(--carbon-08)":"none",alignItems:"center",gap:14,background:isSelected?"rgba(224,138,117,.03)":"transparent",transition:"background .12s"}}>
-                          <span style={{width:18,height:18,borderRadius:5,border:`1.5px solid ${isSelected?"var(--clay-500)":"var(--carbon-20)"}`,background:isSelected?"var(--clay-500)":"transparent",color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700,flexShrink:0,cursor:"pointer"}} onClick={()=>{if(isSelected)adj(key,-999);else adj(key,1);}}>
+                        <div className={`grid grid-cols-[22px_1fr_1fr_150px_28px] px-4 py-3 items-center gap-3.5 transition-colors ${i>0?"border-t border-carbon-08":""} ${isSelected?"bg-[rgba(224,138,117,.03)]":"bg-transparent"}`}>
+                          <span className={`w-[18px] h-[18px] rounded-[5px] border-[1.5px] flex items-center justify-center text-[11px] font-bold shrink-0 cursor-pointer ${isSelected?"border-[#E08A75] bg-[#E08A75] text-white":"border-carbon-20 bg-transparent text-transparent"}`} onClick={()=>{if(isSelected)adj(key,-999);else adj(key,1);}}>
                             {isSelected?"✓":""}
                           </span>
-                          <span style={{fontSize:13,fontWeight:600,color:"var(--carbon-300)"}}>{r.label}</span>
+                          <span className="text-[13px] font-semibold text-carbon-300 leading-tight">{r.label}</span>
                           {isSelected?(
-                            <input value={dishNotes[key]||""} onChange={e=>setDishNotes(p=>({...p,[key]:e.target.value}))} placeholder="Dish note…" style={{width:"100%",border:"1px solid var(--carbon-12)",borderRadius:5,padding:"5px 8px",fontSize:11,color:"var(--carbon-300)",background:"#fff",outline:"none",fontFamily:"inherit"}} onClick={e=>e.stopPropagation()}/>
+                            <input value={dishNotes[key]||""} onChange={e=>setDishNotes(p=>({...p,[key]:e.target.value}))} placeholder="Dish note…" className="w-full border border-carbon-12 rounded-[5px] px-2 py-1 text-[11px] text-carbon-300 bg-white outline-none focus:border-[#E08A75]" onClick={e=>e.stopPropagation()}/>
                           ):<span/>}
-                          <div style={{display:"flex",alignItems:"center",gap:6,justifyContent:"flex-end"}}>
-                            <button style={{width:28,height:28,border:"1px solid var(--carbon-20)",borderRadius:6,background:"#fff",cursor:"pointer",fontSize:14,color:"var(--carbon-50)",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700,flexShrink:0}} onClick={()=>adj(key,-1)}>−</button>
-                            <input value={q} placeholder="0" onChange={e=>setQty(key,e.target.value)} style={{width:56,padding:"5px 8px",border:`1px solid ${isSelected?"var(--clay-500)":"var(--carbon-20)"}`,borderRadius:6,background:isSelected?"var(--clay-50)":"#fff",fontSize:14,fontWeight:700,textAlign:"center",color:isSelected?"var(--clay-700)":"var(--carbon-300)",fontFamily:"inherit",outline:"none"}}/>
-                            <button style={{width:28,height:28,border:"1px solid var(--carbon-20)",borderRadius:6,background:"#fff",cursor:"pointer",fontSize:14,color:"var(--carbon-50)",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700,flexShrink:0}} onClick={()=>adj(key,1)}>+</button>
+                          <div className="flex items-center gap-1.5 justify-end">
+                            <button className="w-7 h-7 border border-carbon-20 rounded-md bg-white cursor-pointer text-sm text-carbon-50 flex items-center justify-center font-bold shrink-0 hover:border-carbon-50 transition-colors" onClick={()=>adj(key,-1)}>−</button>
+                            <input value={q} placeholder="0" onChange={e=>setQty(key,e.target.value)} className={`w-14 px-2 py-1 rounded-md text-sm font-bold text-center outline-none ${isSelected?"border border-[#E08A75] bg-white text-[#A3503B] shadow-[0_0_0_1px_#E08A75_inset]":"border border-carbon-20 bg-white text-carbon-300"}`}/>
+                            <button className="w-7 h-7 border border-carbon-20 rounded-md bg-white cursor-pointer text-sm text-carbon-50 flex items-center justify-center font-bold shrink-0 hover:border-carbon-50 transition-colors" onClick={()=>adj(key,1)}>+</button>
                           </div>
                           {isSelected?(
-                            <button onClick={()=>setExpanded(p=>({...p,[key]:!p[key]}))} style={{width:24,height:24,border:"1px solid var(--carbon-12)",borderRadius:5,background:"transparent",cursor:"pointer",fontSize:10,color:"var(--carbon-50)",display:"flex",alignItems:"center",justifyContent:"center",transition:"all .12s",transform:isExpanded?"rotate(180deg)":"none"}}>▾</button>
+                            <button onClick={()=>setExpanded(p=>({...p,[key]:!p[key]}))} className={`w-6 h-6 border border-carbon-12 rounded-[5px] bg-white cursor-pointer text-[10px] text-carbon-50 flex items-center justify-center transition-transform hover:bg-black/5 ${isExpanded?"rotate-180":""}`}>▾</button>
                           ):<span/>}
                         </div>
                         {isSelected&&isExpanded&&(
-                          <div style={{background:"#F7F5F2",borderTop:"1px dashed var(--carbon-08)",padding:"10px 18px 14px 54px"}}>
-                            <div style={{fontSize:9,fontWeight:700,letterSpacing:".12em",textTransform:"uppercase",color:"var(--carbon-50)",marginBottom:8}}>Ingredient Notes</div>
+                          <div className="bg-[#F7F5F2] border-t border-dashed border-carbon-08 pt-2.5 pb-3.5 pr-4 pl-[54px]">
+                            <div className="text-[9px] font-bold tracking-[.12em] uppercase text-carbon-50 mb-2">Ingredient Notes</div>
                             {r.ingredients.filter(ing=>ING[ing.name]).map(ing=>(
-                              <div key={ing.name} style={{display:"flex",alignItems:"center",gap:10,marginBottom:6}}>
-                                <span style={{fontSize:12,color:"var(--carbon-300)",minWidth:150,flexShrink:0}}>
+                              <div key={ing.name} className="flex items-center gap-2.5 mb-1.5">
+                                <span className="text-xs font-semibold text-carbon-300 min-w-[150px] shrink-0">
                                   {ing.name}
-                                  <span style={{fontSize:10,color:"var(--carbon-50)",marginLeft:5}}>{"oz" in ing?ing.oz+"oz":ing.ea+" ea"}</span>
+                                  <span className="text-[10px] font-normal text-carbon-50 ml-1.5">{"oz" in ing?ing.oz+"oz":ing.ea+" ea"}</span>
                                 </span>
                                 <input
                                   value={(ingNotes[key]||{})[ing.name]||""}
                                   onChange={e=>setIngNote(key,ing.name,e.target.value)}
                                   placeholder="Note…"
-                                  style={{flex:1,border:"1px solid var(--carbon-12)",borderRadius:5,padding:"4px 8px",fontSize:11,color:"var(--carbon-300)",background:"#fff",outline:"none",fontFamily:"inherit"}}
+                                  className="flex-1 border border-carbon-12 rounded-[5px] px-2 py-1 text-[11px] text-carbon-300 bg-white outline-none focus:border-[#E08A75]"
                                 />
                               </div>
                             ))}
@@ -190,38 +190,41 @@ export default function MenuBuilder({event,RECIPES,ING,onApply,onSkip,onBack}){
         </div>
 
         {/* RIGHT COLUMN: Live Prep Calc & Actions */}
-        <div style={{display:"flex",flexDirection:"column",gap:16,position:"sticky",top:32}}>
-          <div style={{background:"var(--card)",border:"1px solid var(--border)",borderRadius:16,boxShadow:"var(--shadow)",overflow:"hidden",display:"flex",flexDirection:"column",height:"calc(100vh - 240px)"}}>
-            <div style={{padding:"16px 20px",borderBottom:"1px solid var(--carbon-08)",background:"var(--masa-100)",flexShrink:0}}>
-              <div style={{fontSize:10,fontWeight:700,letterSpacing:".15em",textTransform:"uppercase",color:"var(--carbon-50)"}}>Live prep calc</div>
-              <div style={{display:"flex",alignItems:"baseline",gap:6,marginTop:4}}>
-                <span style={{fontSize:24,fontWeight:700,letterSpacing:"-.02em",color:"var(--carbon-300)"}}>{calcResults.length}</span>
-                <span style={{fontSize:11,color:"var(--carbon-50)"}}>ingredients · {totalCovers} covers</span>
+        <div className="flex flex-col gap-4 sticky top-8">
+          <div className="bg-white border border-bd rounded-2xl shadow-custom overflow-hidden flex flex-col h-[calc(100vh-240px)]">
+            <div className="px-5 py-4 border-b border-carbon-08 bg-masa-100 shrink-0">
+              <div className="text-[10px] font-bold tracking-[.15em] uppercase text-carbon-50">Live prep calc</div>
+              <div className="flex items-baseline gap-1.5 mt-1">
+                <span className="text-2xl font-bold tracking-[-.02em] text-carbon-300">{calcResults.length}</span>
+                <span className="text-[11px] font-medium text-carbon-50">ingredients · {totalCovers} covers</span>
               </div>
             </div>
-            <div style={{overflowY:"auto",flex:1,minHeight:0,overscrollBehavior:"contain"}}>
+            <div className="overflow-y-auto flex-1 min-h-0 bg-white">
               {GROUP_ORDER.map(g=>{
                 const items=calcByGroup[g];
                 if(!items||!items.length)return null;
                 return(
                   <div key={g}>
-                    <div style={{padding:"7px 16px",fontSize:9,fontWeight:700,letterSpacing:".15em",textTransform:"uppercase",color:"var(--clay-500)",background:"var(--clay-50)"}}>{GROUPS[g].label}</div>
+                    <div className="px-4 py-1.5 text-[9px] font-bold tracking-[.15em] uppercase text-clay-700 bg-clay-50">{GROUPS[g].label}</div>
                     {items.map((item,j)=>(
-                      <div key={item.name} style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",padding:"7px 16px",borderTop:j>0?"1px dashed var(--carbon-08)":"none",fontSize:12}}>
-                        <span style={{color:"var(--carbon-300)"}}>{item.name}</span>
-                        <span style={{fontWeight:700,color:"var(--clay-600)",letterSpacing:"-.01em",marginLeft:8,whiteSpace:"nowrap"}}>{item.calculatedQty} {item.unit}</span>
+                      <div key={item.id} className={`flex justify-between items-center px-4 py-1.5 text-xs ${j>0?"border-t border-dashed border-carbon-08":""}`}>
+                        <div className="flex flex-col">
+                          <span className="font-semibold text-carbon-300">{item.name}</span>
+                          {item.variation && <span className="text-[10px] italic font-medium text-carbon-50 bg-black/5 px-1 py-0.5 rounded-sm self-start mt-0.5">{item.variation}</span>}
+                        </div>
+                        <span className="font-bold text-clay-700 tracking-[-.01em] ml-2 whitespace-nowrap shrink-0">{item.calculatedQty} {item.unit}</span>
                       </div>
                     ))}
                   </div>
                 );
               })}
               {calcResults.length===0&&(
-                <div style={{padding:"32px 20px",textAlign:"center",fontSize:12,color:"var(--carbon-50)",fontFamily:"var(--font-serif)"}}>Add dishes to see ingredient totals</div>
+                <div className="p-8 text-center text-xs font-medium text-carbon-50">Add dishes to see ingredient totals</div>
               )}
             </div>
           </div>
 
-          <button className="btn btn-primary" style={{width:"100%",padding:"14px 16px",fontSize:14,borderRadius:12,fontWeight:700,boxShadow:"var(--shadow-md)"}} onClick={handleApply}>
+          <button className="bg-[#E08A75] text-white border-none w-full py-3.5 px-4 text-sm rounded-xl font-bold shadow-custom-md cursor-pointer hover:opacity-90 transition-colors" onClick={handleApply}>
             Next: Review &amp; Generate →
           </button>
         </div>

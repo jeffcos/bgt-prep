@@ -111,3 +111,175 @@
   max-width: 300px;
   line-height: 1.5;
 }
+
+/* --- UP NEXT HORIZONTAL CARD --- */
+.upnext-card-horizontal {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.upnext-card-horizontal:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* --- MINI CALENDAR WIDGET --- */
+.mini-cal-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--carbon-200);
+  width: 22px;
+  height: 22px;
+  margin: 0 auto;
+  border-radius: 50%;
+  cursor: default;
+  position: relative;
+  transition: all 0.15s ease;
+}
+.mini-cal-cell:hover {
+  background: var(--carbon-08);
+}
+.mini-cal-cell.other-month {
+  color: var(--muted);
+  opacity: 0.3;
+}
+.mini-cal-cell.today {
+  background: var(--carbon-300);
+  color: #fff;
+  font-weight: 800;
+}
+.mini-cal-cell.today:hover {
+  background: var(--carbon-200);
+}
+.mini-cal-cell.has-event {
+  font-weight: 700;
+}
+.mini-cal-cell.has-event::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--color-clay-500);
+}
+.mini-cal-cell.today.has-event::after {
+  background: #fff;
+}
+
+/* --- WEEKLY EVENT GRAPH --- */
+.graph-bar {
+  transition: background 0.15s ease;
+}
+.graph-bar-wrap {
+  cursor: pointer;
+}
+.graph-bar-wrap:hover .graph-bar {
+  background: rgba(0, 0, 0, 0.08) !important;
+}
+.graph-bar-wrap:hover .graph-bar-fill {
+  filter: brightness(0.95);
+}
+.graph-bar-val {
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+.graph-bar-wrap:hover .graph-bar-val {
+  transform: translateY(-2px);
+  color: var(--accent) !important;
+}
+
+/* --- CALENDAR NAVIGATION --- */
+.cal-nav-btn {
+  transition: all 0.2s ease;
+}
+.cal-nav-btn:hover {
+  background: var(--carbon-08) !important;
+  color: var(--carbon-300) !important;
+}
+.cal-nav-btn:active {
+  transform: scale(0.95);
+}
+
+/* --- DASHBOARD GRID LAYOUT --- */
+.dash-top-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 24px;
+  margin-bottom: 24px;
+  align-items: stretch;
+}
+
+.dash-bottom-row {
+  width: 100%;
+}
+
+.mini-cal-card {
+  width: 220px;
+  max-width: 220px;
+}
+
+.upnext-card-horizontal {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.upnext-card-horizontal:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+@media (max-width: 1350px) {
+  .upnext-card-horizontal {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+    padding: 16px 20px;
+  }
+  .upnext-right-sec {
+    width: 100% !important;
+  }
+}
+
+@media (max-width: 1100px) {
+  .dash-top-row {
+    grid-template-columns: 1fr;
+    justify-items: stretch;
+  }
+  .mini-cal-card {
+    width: 100%;
+    max-width: 240px;
+    margin: 0 auto;
+  }
+  .upnext-card-horizontal {
+    flex-direction: row;
+    align-items: center;
+    padding: 20px 24px;
+  }
+  .upnext-right-sec {
+    width: 240px !important;
+  }
+}
+
+@media (max-width: 800px) {
+  .upnext-card-horizontal {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+    padding: 16px 20px;
+  }
+  .upnext-right-sec {
+    width: 100% !important;
+  }
+}
+
+
+
+
+

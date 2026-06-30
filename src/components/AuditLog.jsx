@@ -24,7 +24,7 @@ const ACTION_COLORS={
   item_added:"var(--cactus-400)",
   item_removed:"#DC2626",
   item_updated:"var(--clay-400)",
-  menu_applied:"var(--clay-500)",
+  menu_applied:"var(--color-clay-500)",
 };
 
 function fmtTs(ts){
@@ -63,19 +63,18 @@ export default function AuditLog(){
 
   return(
     <div>
-      <div className="mgr-page-title">Audit Log</div>
-      <div className="mgr-page-sub">{logs.length} total entries · Owner access only</div>
+      <div className="text-3xl font-extrabold text-carbon-300 leading-tight tracking-[-.02em]">Audit Log</div>
+      <div className="text-sm font-semibold text-carbon-50 mt-1 mb-6">{logs.length} total entries · Admin access only</div>
 
-      <div style={{display:"flex",gap:10,marginBottom:16,flexWrap:"wrap"}}>
+      <div className="flex gap-2.5 mb-4 flex-wrap">
         <input
-          className="dash-search"
-          style={{flex:"1 1 220px",maxWidth:320}}
+          className="w-full max-w-[320px] box-border py-2 px-3.5 border border-carbon-12 rounded-lg bg-white text-[13px] outline-none focus:border-[#E08A75] transition-colors"
           placeholder="Search event, detail, or user…"
           value={search}
           onChange={e=>setSearch(e.target.value)}
         />
         <select
-          style={{height:36,padding:"0 10px",borderRadius:8,border:"1px solid var(--carbon-12)",fontSize:13,color:"var(--carbon-200)",background:"#fff",cursor:"pointer"}}
+          className="h-9 px-2.5 rounded-lg border border-carbon-12 text-[13px] text-carbon-200 bg-white cursor-pointer outline-none focus:border-[#E08A75]"
           value={filterAction}
           onChange={e=>setFilterAction(e.target.value)}
         >
@@ -83,7 +82,7 @@ export default function AuditLog(){
           {Object.entries(ACTION_LABELS).map(([k,v])=><option key={k} value={k}>{v}</option>)}
         </select>
         <select
-          style={{height:36,padding:"0 10px",borderRadius:8,border:"1px solid var(--carbon-12)",fontSize:13,color:"var(--carbon-200)",background:"#fff",cursor:"pointer"}}
+          className="h-9 px-2.5 rounded-lg border border-carbon-12 text-[13px] text-carbon-200 bg-white cursor-pointer outline-none focus:border-[#E08A75]"
           value={filterUser}
           onChange={e=>setFilterUser(e.target.value)}
         >
@@ -93,7 +92,7 @@ export default function AuditLog(){
       </div>
 
       {loading?(
-        <div style={{padding:40,textAlign:"center",color:"var(--carbon-50)"}}>Loading…</div>
+        <div className="p-10 text-center font-medium text-carbon-50">Loading…</div>
       ):!filtered.length?(
         <EmptyStateWrapper
           illustration={EmptyAuditIllustration}
@@ -102,32 +101,34 @@ export default function AuditLog(){
           color="var(--carbon-50)"
         />
       ):(
-        <table className="past-events-tbl">
-          <thead>
-            <tr>
-              <th>Time</th>
-              <th>User</th>
-              <th>Event</th>
-              <th>Action</th>
-              <th>Detail</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map(l=>(
-              <tr key={l.id}>
-                <td style={{fontSize:11,color:"var(--carbon-50)",whiteSpace:"nowrap"}}>{fmtTs(l.timestamp)}</td>
-                <td style={{fontSize:13,fontWeight:600,color:"var(--carbon-300)",whiteSpace:"nowrap"}}>{l.userName||"—"}</td>
-                <td style={{fontSize:13,color:"var(--carbon-200)",maxWidth:160,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{l.eventName||"—"}</td>
-                <td style={{whiteSpace:"nowrap"}}>
-                  <span style={{fontSize:11,fontWeight:700,color:ACTION_COLORS[l.action]||"var(--carbon-50)",letterSpacing:".04em",textTransform:"uppercase"}}>
-                    {ACTION_LABELS[l.action]||l.action}
-                  </span>
-                </td>
-                <td style={{fontSize:12,color:"var(--carbon-50)",maxWidth:280,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{l.detail||"—"}</td>
+        <div className="bg-white border border-bd rounded-2xl overflow-hidden shadow-sm">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="bg-bg border-b border-bd text-left text-[10px] font-bold text-muted uppercase tracking-wider">
+                <th className="py-3 px-4">Time</th>
+                <th className="py-3 px-4">User</th>
+                <th className="py-3 px-4">Event</th>
+                <th className="py-3 px-4">Action</th>
+                <th className="py-3 px-4">Detail</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filtered.map(l=>(
+                <tr key={l.id} className="border-b border-bd last:border-b-0 hover:bg-black/5 transition-colors">
+                  <td className="py-3 px-4 text-[11px] text-carbon-50 whitespace-nowrap">{fmtTs(l.timestamp)}</td>
+                  <td className="py-3 px-4 text-[13px] font-semibold text-carbon-300 whitespace-nowrap">{l.userName||"—"}</td>
+                  <td className="py-3 px-4 text-[13px] text-carbon-200 max-w-[160px] overflow-hidden text-ellipsis whitespace-nowrap">{l.eventName||"—"}</td>
+                  <td className="py-3 px-4 whitespace-nowrap">
+                    <span className="text-[11px] font-bold tracking-[.04em] uppercase" style={{color:ACTION_COLORS[l.action]||"var(--carbon-50)"}}>
+                      {ACTION_LABELS[l.action]||l.action}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4 text-xs text-carbon-50 max-w-[280px] overflow-hidden text-ellipsis whitespace-nowrap">{l.detail||"—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

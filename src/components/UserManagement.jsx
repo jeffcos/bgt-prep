@@ -16,6 +16,11 @@ const secondaryApp = initializeApp({
 const secondaryAuth = getAuth(secondaryApp);
 
 const ROLES = ["staff", "manager", "owner"];
+const ROLE_LABELS = {
+  staff: "Staff",
+  manager: "Manager",
+  owner: "Admin",
+};
 const ROLE_COLORS = {
   staff:   { bg:"var(--masa-100)",   color:"var(--carbon-200)" },
   manager: { bg:"var(--sol-100)",    color:"var(--sol-700)" },
@@ -54,15 +59,20 @@ export default function UserManagement({ currentUserId }){
       // Create auth account using secondary app (won't affect current session)
       const cred = await createUserWithEmailAndPassword(secondaryAuth, form.email, form.password);
       const uid = cred.user.uid;
+      
+      // Immediately send a password reset email so they can log in
+      await sendPasswordResetEmail(secondaryAuth, form.email);
+      
       // Sign out of secondary app immediately
       await secondaryAuth.signOut();
+      
       // Create Firestore user doc
       await setDoc(doc(db, "users", uid), {
         name:  form.name,
         email: form.email,
         role:  form.role,
       });
-      setMsg(`${form.name} added successfully.`);
+      setMsg(`${form.name} added successfully. A password reset email has been sent to them.`);
       setForm({ name:"", email:"", password:"", role:"staff" });
       setShowAdd(false);
       loadUsers();
@@ -83,49 +93,60 @@ export default function UserManagement({ currentUserId }){
     setUsers(prev => prev.filter(u => u.uid !== uid));
   };
 
+  const handleManualReset = async (email, name) => {
+    if (!confirm(`Send a password reset email to ${name} (${email})?`)) return;
+    try {
+      await sendPasswordResetEmail(secondaryAuth, email);
+      setMsg(`Password reset email sent to ${email}.`);
+      setTimeout(() => setMsg(""), 3000);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
   const sf = (k, v) => setForm(p => ({ ...p, [k]: v }));
 
   return (
     <div>
-      <div style={{ display:"flex", alignItems:"flex-end", justifyContent:"space-between", marginBottom:16 }}>
+      <div className="flex items-end justify-between mb-8">
         <div>
-          <div className="mgr-page-title">Team</div>
-          <div className="mgr-page-sub">{users.length} member{users.length !== 1 ? "s" : ""}</div>
+          <div className="text-3xl font-extrabold text-carbon-300 leading-tight tracking-[-.02em]">Team</div>
+          <div className="text-sm font-semibold text-carbon-50 mt-1">{users.length} member{users.length !== 1 ? "s" : ""}</div>
         </div>
-        <button className="btn btn-primary" onClick={() => { setShowAdd(true); setError(""); }}>+ Add User</button>
+        <button className="bg-[#E08A75] text-white border-none px-6 py-3 rounded-xl text-sm font-bold shadow-custom transition-colors hover:bg-clay-600 cursor-pointer" onClick={() => { setShowAdd(true); setError(""); }}>+ Add User</button>
       </div>
 
-      {msg && <div style={{ background:"var(--cactus-50)", border:"1px solid var(--cactus-100)", borderRadius:8, padding:"10px 14px", fontSize:13, color:"var(--cactus-700)", marginBottom:14 }}>{msg}</div>}
+      {msg && <div className="bg-cactus-50 border border-cactus-100 rounded-xl px-4 py-3 text-[13px] font-medium text-cactus-700 mb-4">{msg}</div>}
 
       {/* Add user form */}
       {showAdd && (
-        <div style={{ background:"#fff", border:"1px solid var(--carbon-08)", borderRadius:12, padding:"22px 24px", marginBottom:20 }}>
-          <div style={{ fontSize:15, fontWeight:700, marginBottom:16 }}>New Team Member</div>
+        <div className="bg-white border border-bd rounded-2xl p-6 shadow-custom mb-6">
+          <div className="text-[15px] font-extrabold text-carbon-300 mb-6 tracking-tight">New Team Member</div>
           <form onSubmit={handleAddUser}>
-            <div className="fgrid">
-              <div className="fg">
-                <label className="flabel">Full Name *</label>
-                <input className="finput" placeholder="e.g. Maria Garcia" value={form.name} onChange={e => sf("name", e.target.value)} required/>
+            <div className="grid grid-cols-2 gap-x-6 gap-y-5 mb-8">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-extrabold text-muted uppercase tracking-[.12em]">Full Name *</label>
+                <input className="w-full box-border px-4 py-3 rounded-xl border border-carbon-20 bg-white text-[13px] font-medium outline-none focus:border-[#E08A75] transition-colors shadow-[0_1px_2px_rgba(0,0,0,0.03)]" placeholder="e.g. Maria Garcia" value={form.name} onChange={e => sf("name", e.target.value)} required/>
               </div>
-              <div className="fg">
-                <label className="flabel">Role</label>
-                <select className="finput" value={form.role} onChange={e => sf("role", e.target.value)}>
-                  {ROLES.map(r => <option key={r} value={r}>{r.charAt(0).toUpperCase()+r.slice(1)}</option>)}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-extrabold text-muted uppercase tracking-[.12em]">Role</label>
+                <select className="w-full box-border px-4 py-3 rounded-xl border border-carbon-20 bg-white text-[13px] font-medium outline-none focus:border-[#E08A75] transition-colors shadow-[0_1px_2px_rgba(0,0,0,0.03)]" value={form.role} onChange={e => sf("role", e.target.value)}>
+                  {ROLES.map(r => <option key={r} value={r}>{ROLE_LABELS[r] || r}</option>)}
                 </select>
               </div>
-              <div className="fg">
-                <label className="flabel">Email *</label>
-                <input className="finput" type="email" placeholder="staff@bordergrill.com" value={form.email} onChange={e => sf("email", e.target.value)} required/>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-extrabold text-muted uppercase tracking-[.12em]">Email *</label>
+                <input className="w-full box-border px-4 py-3 rounded-xl border border-carbon-20 bg-white text-[13px] font-medium outline-none focus:border-[#E08A75] transition-colors shadow-[0_1px_2px_rgba(0,0,0,0.03)]" type="email" placeholder="staff@bordergrill.com" value={form.email} onChange={e => sf("email", e.target.value)} required/>
               </div>
-              <div className="fg">
-                <label className="flabel">Temporary Password *</label>
-                <input className="finput" type="password" placeholder="Min 6 characters" value={form.password} onChange={e => sf("password", e.target.value)} required/>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-extrabold text-muted uppercase tracking-[.12em]">Temporary Password *</label>
+                <input className="w-full box-border px-4 py-3 rounded-xl border border-carbon-20 bg-white text-[13px] font-medium outline-none focus:border-[#E08A75] transition-colors shadow-[0_1px_2px_rgba(0,0,0,0.03)]" type="password" placeholder="Min 6 characters" value={form.password} onChange={e => sf("password", e.target.value)} required/>
               </div>
             </div>
-            {error && <div style={{ fontSize:13, color:"var(--red)", marginTop:10 }}>{error}</div>}
-            <div style={{ display:"flex", gap:8, marginTop:16, justifyContent:"flex-end" }}>
-              <button type="button" className="btn btn-secondary" onClick={() => { setShowAdd(false); setError(""); }}>Cancel</button>
-              <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? "Adding…" : "Add to Team"}</button>
+            {error && <div className="text-[13px] font-semibold text-red mb-4">{error}</div>}
+            <div className="flex gap-3 justify-end pt-5 border-t border-carbon-08">
+              <button type="button" className="bg-white border border-[#D4CCC2] text-carbon-300 px-5 py-2.5 rounded-xl text-[13px] font-bold cursor-pointer hover:bg-black/5 shadow-sm transition-colors" onClick={() => { setShowAdd(false); setError(""); }}>Cancel</button>
+              <button type="submit" className="bg-[#E08A75] text-white border-none px-6 py-2.5 rounded-xl text-[13px] font-bold cursor-pointer hover:bg-clay-600 shadow-sm transition-colors disabled:opacity-50" disabled={saving}>{saving ? "Adding…" : "Add to Team"}</button>
             </div>
           </form>
         </div>
@@ -133,27 +154,31 @@ export default function UserManagement({ currentUserId }){
 
       {/* User list */}
       {loading ? (
-        <div style={{ padding:28, textAlign:"center", color:"var(--carbon-50)" }}>Loading…</div>
+        <div className="p-10 text-center font-medium text-carbon-50">Loading…</div>
       ) : (
-        <div style={{ background:"#fff", border:"1px solid var(--carbon-08)", borderRadius:12, overflow:"hidden" }}>
+        <div className="bg-white border border-bd rounded-2xl overflow-hidden shadow-sm">
           {users.map((u, i) => (
-            <div key={u.uid} style={{ display:"grid", gridTemplateColumns:"1fr auto auto", gap:16, alignItems:"center", padding:"14px 20px", borderTop: i > 0 ? "1px solid var(--carbon-08)" : "none" }}>
+            <div key={u.uid} className={`grid grid-cols-[1fr_auto_auto] gap-4 items-center px-6 py-4 ${i > 0 ? "border-t border-carbon-08" : ""}`}>
               <div>
-                <div style={{ fontWeight:600, fontSize:14, color:"var(--carbon-300)" }}>{u.name || "—"}</div>
-                <div style={{ fontSize:12, color:"var(--carbon-50)", marginTop:2 }}>{u.email}</div>
+                <div className="font-extrabold text-sm text-carbon-300">{u.name || "—"}</div>
+                <div className="text-xs font-medium text-carbon-50 mt-0.5">{u.email}</div>
               </div>
               <select
                 value={u.role || "staff"}
                 onChange={e => handleRoleChange(u.uid, e.target.value)}
                 disabled={u.uid === currentUserId}
-                style={{ border:"1px solid var(--carbon-12)", borderRadius:7, padding:"5px 10px", fontSize:12, fontWeight:600, fontFamily:"inherit", cursor: u.uid === currentUserId ? "default" : "pointer", background: ROLE_COLORS[u.role]?.bg || "var(--masa-100)", color: ROLE_COLORS[u.role]?.color || "var(--carbon-200)", outline:"none" }}
+                className="border border-carbon-12 rounded-lg px-3 py-1.5 text-xs font-bold outline-none"
+                style={{ cursor: u.uid === currentUserId ? "default" : "pointer", background: ROLE_COLORS[u.role]?.bg || "var(--masa-100)", color: ROLE_COLORS[u.role]?.color || "var(--carbon-200)" }}
               >
-                {ROLES.map(r => <option key={r} value={r}>{r.charAt(0).toUpperCase()+r.slice(1)}</option>)}
+                {ROLES.map(r => <option key={r} value={r}>{ROLE_LABELS[r] || r}</option>)}
               </select>
               {u.uid !== currentUserId ? (
-                <button className="btn btn-secondary btn-sm" style={{ color:"var(--red)", borderColor:"#FECACA" }} onClick={() => handleRemove(u.uid, u.name)}>Remove</button>
+                <div className="flex gap-2">
+                  <button className="bg-white border border-carbon-12 text-carbon-200 px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer hover:bg-black/5 transition-colors" onClick={() => handleManualReset(u.email, u.name)}>Reset Auth</button>
+                  <button className="bg-white border border-[#FECACA] text-red px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer hover:bg-[#FEF2F2] transition-colors" onClick={() => handleRemove(u.uid, u.name)}>Remove</button>
+                </div>
               ) : (
-                <div style={{ width:68 }}/>
+                <div className="w-[155px]"/>
               )}
             </div>
           ))}

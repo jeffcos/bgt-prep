@@ -3,98 +3,14 @@ import { GROUPS, GROUP_ORDER, STICKER, getSticker, RECIPE_CATS, RCAT_COLORS } fr
 import { TimeSmart } from "./EventForm";
 import { uid } from "../utils/calc";
 
-export function DItem({item,gkey,checked,already,onToggle}){
-  return(
-    <div className="ditem" onClick={already?undefined:onToggle} style={{opacity:already?.45:1,cursor:already?"default":"pointer"}}>
-      <input type="checkbox" checked={checked} onChange={onToggle} disabled={already} onClick={e=>e.stopPropagation()}/>
-      <div style={{flex:1}}>
-        <div className="ditem-name">{item.name}{already&&<span style={{fontSize:10,color:"#9CA3AF"}}> (on sheet)</span>}</div>
-        <div className="ditem-meta">{item.unit}{item.container?` · ${item.container}`:""}</div>
-      </div>
-    </div>
-  );
-}
-
-export function ItemRow({item,onUpdate,onRemove}){
-  const [editing,setEditing]=useState(false);
-  const isAuto=item.fromMenu&&!editing;
-  return(
-    <tr>
-      <td><div className="iname">{item.name}</div>{item.fromMenu&&!editing&&<div className="icalc"> from menu</div>}{item.variation&&<div className="ivar">{item.variation}</div>}</td>
-      <td><input className={`ci ci-qty${isAuto?" auto":""}`} type="number" placeholder="—" value={item.quantity||""} onFocus={()=>setEditing(true)} onBlur={()=>setEditing(false)} onChange={e=>onUpdate({quantity:e.target.value})}/></td>
-      <td><input className="ci ci-sm" value={item.unit||""} onChange={e=>onUpdate({unit:e.target.value})}/></td>
-      <td><input className="ci" value={item.container||""} onChange={e=>onUpdate({container:e.target.value})}/></td>
-      <td><input className="ci" placeholder="notes or variation…" value={item.notes||""} style={{fontStyle:item.notes?"italic":"normal"}} onChange={e=>onUpdate({notes:e.target.value})}/></td>
-      <td><input className={`ci ci-init${item.prepped?.trim()?" ci-prepped":""}`} placeholder="initials" value={item.prepped||""} onChange={e=>onUpdate({prepped:e.target.value})}/></td>
-      <td><input className="ci ci-init" placeholder="qty" value={item.loaded||""} onChange={e=>onUpdate({loaded:e.target.value})}/></td>
-      <td><input className="ci ci-init" placeholder="qty" value={item.returned||""} onChange={e=>onUpdate({returned:e.target.value})}/></td>
-      <td><button className="rmv" onClick={onRemove}>×</button></td>
-    </tr>
-  );
-}
-
-export function ManualDrawer({event,ING,onClose,onAdd}){
-  const [search,setSearch]=useState(""); const [sel,setSel]=useState({}); const [activeCat,setActiveCat]=useState("PROTEINS");
-  const [custom,setCustom]=useState({show:false,name:"",group:"PROTEINS",unit:"",container:"",notes:"",variation:""});
-  const existing=new Set(event.items.map(i=>i.name.toLowerCase()));
-  const toggle=(g,name)=>{const k=`${g}::${name}`;setSel(p=>({...p,[k]:!p[k]}));};
-  const isChecked=(g,name)=>!!sel[`${g}::${name}`];
-  const bygroup=useMemo(()=>{const out={};GROUP_ORDER.forEach(g=>{out[g]=Object.entries(ING).filter(([,cfg])=>cfg.group===g).map(([name,cfg])=>({name,...cfg}));});return out;},[ING]);
-  const filtered=useMemo(()=>{if(!search)return null;const q=search.toLowerCase();const out={};Object.entries(ING).forEach(([name,cfg])=>{if(name.toLowerCase().includes(q)){if(!out[cfg.group])out[cfg.group]=[];out[cfg.group].push({name,...cfg});}});return out;},[search,ING]);
-  const selCount=Object.values(sel).filter(Boolean).length;
-  const sc=(k,v)=>setCustom(p=>({...p,[k]:v}));
-  const handleAdd=()=>{
-    const toAdd=Object.entries(sel).filter(([,v])=>v).map(([k])=>{const[g,name]=k.split("::");const cfg=ING[name]||{};return{id:uid(),group:g,category:g,name,quantity:"",unit:cfg.unit||"",container:cfg.container||"",notes:cfg.notes||"",variation:"",prepped:"",loaded:"",returned:"",qtyUsed:""};});
-    onAdd(toAdd);
-  };
-  const handleCustom=()=>{if(!custom.name)return;onAdd([{id:uid(),group:custom.group,category:custom.group,name:custom.name,quantity:"",unit:custom.unit,container:custom.container,notes:custom.notes,variation:custom.variation,prepped:"",loaded:"",returned:"",qtyUsed:""}]);setCustom({show:false,name:"",group:"PROTEINS",unit:"",container:"",notes:"",variation:""});};
-  return(
-    <div className="overlay" onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
-      <div className="drawer">
-        <div className="drawer-hdr"><div className="drawer-title">Add Items Manually</div><button className="drawer-x" onClick={onClose}>×</button></div>
-        <div className="drawer-body">
-          <input className="dsearch" placeholder="Search ingredients…" value={search} onChange={e=>setSearch(e.target.value)}/>
-          {custom.show?(
-            <div className="custom-box">
-              <div className="cbx-title">Custom or Variation Item</div>
-              <div className="cgrid">
-                <div className="fg full"><label className="flabel">Item Name *</label><input className="finput" placeholder="e.g. Mango Habanero Salsa" value={custom.name} onChange={e=>sc("name",e.target.value)}/></div>
-                <div className="fg"><label className="flabel">Group</label><select className="finput" value={custom.group} onChange={e=>sc("group",e.target.value)}>{GROUP_ORDER.map(g=><option key={g} value={g}>{GROUPS[g].label}</option>)}</select></div>
-                <div className="fg"><label className="flabel">Unit</label><input className="finput" placeholder="qt, lb, ea…" value={custom.unit} onChange={e=>sc("unit",e.target.value)}/></div>
-                <div className="fg"><label className="flabel">Container</label><input className="finput" placeholder="clear quart…" value={custom.container} onChange={e=>sc("container",e.target.value)}/></div>
-                <div className="fg"><label className="flabel">Notes</label><input className="finput" value={custom.notes} onChange={e=>sc("notes",e.target.value)}/></div>
-                <div className="fg full"><label className="flabel">Variation / Special Instruction</label><input className="finput" placeholder="dairy-free, extra spicy…" value={custom.variation} onChange={e=>sc("variation",e.target.value)}/></div>
-              </div>
-              <div style={{display:"flex",gap:7,marginTop:9}}>
-                <button className="btn btn-secondary btn-sm" onClick={()=>sc("show",false)}>Cancel</button>
-                <button className="btn btn-primary btn-sm" onClick={handleCustom} disabled={!custom.name}>Add to Sheet</button>
-              </div>
-            </div>
-          ):<button className="btn btn-secondary btn-sm" style={{width:"100%",marginBottom:9}} onClick={()=>sc("show",true)}>+ Add Custom or Variation Item</button>}
-          {!search&&<div className="cat-tabs">{GROUP_ORDER.map(g=><button key={g} className={`ctab ${activeCat===g?"ctab-active":"ctab-idle"}`} style={activeCat===g?{background:GROUPS[g].color}:{}} onClick={()=>setActiveCat(g)}>{GROUPS[g].label.split(" ")[0]}</button>)}</div>}
-          {search?(
-            filtered&&Object.keys(filtered).length>0?Object.entries(filtered).map(([g,items])=>(
-              <div key={g}><div className="dlabel" style={{color:GROUPS[g]?.color}}>{GROUPS[g]?.label||g}</div>
-              {items.map(item=><DItem key={item.name} item={item} gkey={g} checked={isChecked(g,item.name)} already={existing.has(item.name.toLowerCase())} onToggle={()=>toggle(g,item.name)}/>)}</div>
-            )):<div style={{color:"var(--muted)",fontSize:13,padding:"10px 0"}}>No items found. Add a custom item above.</div>
-          ):(bygroup[activeCat]||[]).map(item=><DItem key={item.name} item={item} gkey={activeCat} checked={isChecked(activeCat,item.name)} already={existing.has(item.name.toLowerCase())} onToggle={()=>toggle(activeCat,item.name)}/>)}
-        </div>
-        <div className="drawer-foot">
-          <div className="sel-info">{selCount>0?`${selCount} item${selCount!==1?"s":""} selected`:"Select items or add a custom item above"}</div>
-          <div className="dflex">
-            <button className="btn btn-secondary" style={{flex:1}} onClick={onClose}>Cancel</button>
-            <button className="btn btn-primary" style={{flex:2}} onClick={handleAdd} disabled={!selCount}>Add {selCount||""} Item{selCount!==1?"s":""} →</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+import { ItemRow } from "../features/prepsheet/ItemRow";
+import { ManualDrawer } from "../features/prepsheet/ManualDrawer";
 
 export default function PrepSheet({event,ING,RECIPES,onUpdate,onUpdateItem,onRemoveItem,onAddItems,onDelete,onEditMenu,onEdit,onPrint,printMode}){
   const [collapsed,setCollapsed]=useState({});
   const [showDrawer,setShowDrawer]=useState(false);
   const [activeGroup,setActiveGroup]=useState(null);
+  const [railCollapsed,setRailCollapsed]=useState(false);
   const catRefs=useRef({});
   const scrollToGroup=g=>{
     setCollapsed(p=>({...p,[g]:false}));
@@ -115,283 +31,353 @@ export default function PrepSheet({event,ING,RECIPES,onUpdate,onUpdateItem,onRem
   const fmtTime=t=>{if(!t)return"";const[h,m]=t.split(":");const hr=parseInt(h,10);return`${hr%12||12}:${m}${hr>=12?"pm":"am"}`};
 
   return(
-    <div className="ps-grid">
-      {/* ── CONTEXT RAIL ── */}
-      <aside className="ctx-rail">
-        <div>
-          <div className="rail-event-name">{event.name}</div>
-          <div className="rail-client">{event.truck}{event.guests?` · ${event.guests} guests`:""}</div>
-        </div>
-        <div className="rail-progress-card">
-          <div className="rail-progress-label">Prep progress</div>
-          <div><span className="rail-progress-nums">{prepped}</span><span className="rail-progress-denom"> / {total} items</span></div>
-          <div className="rail-progress-bar"><div className="rail-progress-fill" style={{width:`${pct}%`,background:sc.bar}}/></div>
-          <div className="rail-stat-row">
-            <span className="rail-stat"><strong>{loaded}</strong> loaded</span>
-            <span className="rail-stat"><strong>{returned}</strong> returned</span>
-            {acc!==null&&<span className="rail-stat"><strong>{acc}%</strong> accuracy</span>}
+    <>
+      <div className={`ps-grid grid h-screen w-full relative transition-all duration-300 ${railCollapsed ? "grid-cols-1" : "grid-cols-[280px_1fr]"}`}>
+        {/* ── CONTEXT RAIL ── */}
+        <aside className={`ctx-rail bg-card border-r border-bd p-5 overflow-y-auto overflow-x-hidden flex flex-col gap-6 w-[280px] transition-all duration-300 ${railCollapsed ? "hidden" : "flex"}`}>
+          <div>
+            <div className="text-xl font-extrabold text-carbon-300 leading-tight mb-1">{event.name}</div>
+            <div className="text-[13px] font-semibold text-carbon-50">{event.truck}{event.guests?` · ${event.guests} guests`:""}</div>
           </div>
-        </div>
-        <div>
-          <div className="rail-jump-title">Jump to category</div>
-          {nonEmptyGroups.map(g=>{
-            const items=bygroup[g];
-            const grpPrepped=items.filter(x=>x.prepped?.trim()).length;
-            const grpPct=items.length>0?Math.round(grpPrepped/items.length*100):0;
-            return(
-              <div key={g} className={`rail-jump-item ${activeGroup===g?"active":""}`} onClick={()=>{setActiveGroup(g);scrollToGroup(g);}}>
-                <span className="rail-jump-name">{GROUPS[g].label}</span>
-                <span className="rail-jump-count">{grpPrepped}/{items.length}</span>
-                <div className="rail-jump-bar"><div className="rail-jump-bar-fill" style={{width:`${grpPct}%`,background:sc.bar}}/></div>
-              </div>
-            );
-          })}
-        </div>
-        <div style={{display:"flex",flexDirection:"column",gap:8}}>
-          <button className="rail-btn rail-btn-ghost" onClick={()=>setShowDrawer(true)}>Add Item</button>
-          <button className="rail-btn rail-btn-ghost" onClick={onEditMenu}>Edit Menu</button>
-          <button className="rail-btn rail-btn-ghost" onClick={onEdit}>Edit Event</button>
-          <button className="rail-btn rail-btn-ghost" onClick={onPrint}>Print</button>
-          <button style={{width:"100%",padding:"9px 14px",borderRadius:8,border:"1.5px solid var(--red)",background:"var(--red-bg)",color:"var(--red)",fontSize:12,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}} onClick={onDelete}>Delete Event</button>
-        </div>
-      </aside>
-
-      {/* ── WORK AREA ── */}
-      <main className="ps-work">
-
-        {/* ── PRINT-ONLY HEADER (hidden on screen, shown when printing) ── */}
-        <div className="prep-print-only">
-          <div className="print-header">
-            <div className="print-logo-wrap">
-              <div className="print-logo-mark" style={{width:30,height:30,borderRadius:"50%",background:"#1A1714",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:11,fontWeight:800,letterSpacing:".02em",flexShrink:0}}>BG</div>
-              <div>
-                <div className="print-logo-text">BORDER GRILL</div>
-                <div className="print-logo-sub">TRUCK + CATERING · PREP SHEET</div>
-              </div>
-            </div>
-            <div className="print-event-right">
-              <div className="print-event-title">{event.name}</div>
-              <div className="print-event-meta">{event.truck}{event.date?` · ${fmt(event.date)}`:""}{event.startTime?` · ${fmtTime(event.startTime)}`:""}{event.guests?` · ${event.guests} guests`:""}</div>
-              <div className="print-timestamp">Printed: {new Date().toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric",year:"numeric"})} at {new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"})}</div>
+          <div className="bg-white border border-bd rounded-xl p-4 shadow-sm">
+            <div className="text-[10px] font-bold tracking-widest text-muted uppercase mb-3">Prep progress</div>
+            <div><span className="text-[28px] font-extrabold text-carbon-300 leading-none">{prepped}</span><span className="text-sm text-carbon-50 ml-1 font-semibold"> / {total} items</span></div>
+            <div className="h-1.5 bg-carbon-08 rounded-full overflow-hidden mt-3 mb-4"><div className="h-full rounded-full transition-all" style={{width:`${pct}%`,background:sc.bar}}/></div>
+            <div className="flex flex-col gap-1.5">
+              <span className="text-[11px] text-muted"><strong>{loaded}</strong> loaded</span>
+              <span className="text-[11px] text-muted"><strong>{returned}</strong> returned</span>
+              {acc!==null&&<span className="text-[11px] text-muted"><strong>{acc}%</strong> accuracy</span>}
             </div>
           </div>
-          <div className="print-meta-row">
-            {[
-              ["ORDER READY BY", event.orderReadyBy?fmtTime(event.orderReadyBy):""],
-              ["LOAD BY",        event.loadBy?fmtTime(event.loadBy):""],
-              ["REVISED ON",     event.updatedAt?new Date(event.updatedAt).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}):""],
-              ["LOAD DRIVER",    event.loadDriver||""],
-              ["RETURNS DRIVER", event.returnsDriver||""],
-            ].map(([lbl,val])=>(
-              <div key={lbl} className="print-meta-cell">
-                <div className="print-meta-lbl">{lbl}</div>
-                <div className="print-meta-val">{val}</div>
-              </div>
-            ))}
-          </div>
-          {event.notes?.trim()&&(
-            <div className="print-notes-box">
-              <div className="print-notes-lbl">EVENT NOTES &amp; ALERTS — VISIBLE TO ALL STAFF</div>
-              <div className="print-notes-txt">{event.notes}</div>
-            </div>
-          )}
-        </div>
-
-        {/* Header card */}
-        <div className="ps-hdr-card">
-          <div className="ps-hdr-stripe" style={{background:sc.bar}}/>
-          <div className="ps-hdr-body">
-            <div style={{display:"flex",gap:24,alignItems:"flex-start"}}>
-              <div style={{flex:1,minWidth:0}}>
-                <div className="ps-event-eyebrow" style={{color:sc.bar}}>{event.date?fmtShort(event.date):""}{daysUntil!==null?` · ${daysLabel}`:""}</div>
-                <div className="ps-event-name">{event.name}</div>
-                <div className="ps-event-meta">{event.truck}{event.guests?` · ${event.guests} guests`:""}{event.startTime?` · service at ${fmtTime(event.startTime)}`:""}</div>
-              </div>
-              <div style={{flexShrink:0,display:"flex",flexDirection:"column",gap:12,minWidth:340}}>
-                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:16}}>
-                  {[["Order Ready","orderReadyBy"],["Load Time","loadBy"],["Start Time","startTime"]].map(([lbl,key])=>(
-                    <div key={key}>
-                      <div className="ps-meta-lbl">{lbl}</div>
-                      <TimeSmart value={event[key]||""} onChange={v=>onUpdate({[key]:v})}/>
-                    </div>
-                  ))}
-                </div>
-                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:16}}>
-                  {[["Loaded By","loadDriver","text"],["Return By","returnsDriver","text"]].map(([lbl,key])=>(
-                    <div key={key}>
-                      <div className="ps-meta-lbl">{lbl}</div>
-                      <input className="ps-meta-inp" type="text" value={event[key]||""} onChange={e=>onUpdate({[key]:e.target.value})} placeholder="—"/>
-                    </div>
-                  ))}
-                  <div>
-                    <div className="ps-meta-lbl">Created</div>
-                    <div style={{fontSize:12,fontWeight:600,color:"var(--carbon-300)",borderBottom:"1px solid var(--carbon-08)",paddingBottom:2,marginTop:2}}>
-                      {event.createdAt?new Date(event.createdAt).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}):"—"}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="ps-meta-lbl">Created By</div>
-                    <div style={{fontSize:12,fontWeight:600,color:"var(--carbon-300)",borderBottom:"1px solid var(--carbon-08)",paddingBottom:2,marginTop:2}}>
-                      {event.createdBy?.name||"—"}
-                    </div>
-                  </div>
-                </div>
-                {event.updatedAt&&<div style={{fontSize:10,color:"var(--carbon-50)",letterSpacing:".06em"}}>Last revised: {new Date(event.updatedAt).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})} at {new Date(event.updatedAt).toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"})}</div>}
-              </div>
-            </div>
-            <div className="ps-stat-ribbon">
-              {(()=>{
-                const untilLabel=hoursUntil===null?"—":hoursUntil<=0?"Now":hoursUntil<24?`${hoursUntil}h`:`${Math.floor(hoursUntil/24)}d ${hoursUntil%24}h`;
-                return[["Items",total],["Prepped",prepped],["Loaded",loaded],["Categories",nonEmptyGroups.length],["Until Service",untilLabel]].map(([l,v])=>(
-                  <div key={l} className="ps-stat"><div className="ps-stat-val">{v}</div><div className="ps-stat-lbl">{l}</div></div>
-                ));
-              })()}
-            </div>
-          </div>
-        </div>
-
-        {/* Notes banner */}
-        <div className="ps-notes-banner">
-          <div className="ps-notes-eyebrow">Event notes &amp; alerts · all staff read</div>
-          <textarea className="ps-notes-ta" rows={3} value={event.notes||""} onChange={e=>onUpdate({notes:e.target.value})} placeholder="Add important notes here — allergies, special requests, client instructions…"/>
-        </div>
-
-        {/* Menu chips */}
-        {event.menuSelections?.length>0&&(
-          <div className="ps-menu-bar">
-            <div className="ps-menu-eyebrow">Auto-calculated from menu</div>
-            <div className="ps-menu-chips">
-              {event.menuSelections.map(s=><span key={s.key} className="ps-menu-chip">{s.label||(RECIPES[s.key]?.label)||s.key}: {s.qty}</span>)}
-              <button style={{fontSize:11,fontWeight:600,color:sc.bar,background:"transparent",border:`1px solid ${sc.bar}`,borderRadius:20,padding:"3px 10px",cursor:"pointer",marginLeft:4}} onClick={onEditMenu}>Edit menu →</button>
-            </div>
-          </div>
-        )}
-
-        {/* Category sections */}
-        {GROUP_ORDER.map((g,gIdx)=>{
-          const items=bygroup[g];if(!items.length)return null;
-          const open=!collapsed[g];
-          const grpPrepped=items.filter(x=>x.prepped?.trim()).length;
-          return(
-            <div key={g} className="ps-cat-section" ref={el=>catRefs.current[g]=el}>
-              <div className="ps-cat-hdr" style={{background:sc.bar}} onClick={()=>setCollapsed(p=>({...p,[g]:!p[g]}))}>
-                <span className="ps-cat-num">{String(gIdx+1).padStart(2,"0")}</span>
-                <span className="ps-cat-name">{GROUPS[g].label}</span>
-                <span className="ps-cat-count">{grpPrepped} of {items.length} prepped</span>
-                <span className={`ps-cat-arr ${open?"open":""}`}>▾</span>
-              </div>
-              {open&&(
-                <div className="items-wrap">
-                  <table className="items-tbl">
-                    <thead><tr>
-                      <th>Ingredient</th><th>QTY</th><th>Unit</th>
-                      <th style={{width:"7%"}}>Container</th>
-                      <th style={{width:"32%"}}>Notes / Variation</th>
-                      <th>Prepped</th><th>Loaded</th><th>Returned</th><th/>
-                    </tr></thead>
-                    <tbody>
-                      {items.map(item=>(
-                        <ItemRow key={item.id} item={item}
-                          onUpdate={(patch)=>onUpdateItem(item.id,patch)}
-                          onRemove={()=>onRemoveItem(item.id)}
-                        />
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          );
-        })}
-
-        {event.archived&&(
-          <div className="post-notes-section">
-            <div className="post-notes-title">Post-Event Notes</div>
-            <textarea className="post-notes-ta" rows={4} value={event.postNotes||""} onChange={e=>onUpdate({postNotes:e.target.value})} placeholder="How did it go? Notes for next time…"/>
-          </div>
-        )}
-
-        {/* ── PREP SHEET SIGNATURES (print only) ── */}
-        <div className="print-sigs">
-          {[["Kitchen Manager","kitchenManager"],["Load Driver","loadDriver"],["Returns Driver","returnsDriver"]].map(([lbl,key])=>(
-            <div key={key} className="print-sig">
-              <div className="print-sig-line"/>
-              <div className="print-sig-name">{lbl}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* ── PER DISH BREAKDOWN (print only, shown when pmode=perdish or both) ── */}
-        <div className="perdish-print">
-          <div className="perdish-own-header print-header">
-            <div className="print-logo-wrap">
-              <div style={{width:30,height:30,borderRadius:"50%",background:"#1A1714",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:11,fontWeight:800,flexShrink:0}}>BG</div>
-              <div>
-                <div className="print-logo-text">BORDER GRILL</div>
-                <div className="print-logo-sub">TRUCK + CATERING · PER DISH BREAKDOWN</div>
-              </div>
-            </div>
-            <div className="print-event-right">
-              <div className="print-event-title">{event.name}</div>
-              <div className="print-event-meta">{event.truck}{event.date?` · ${fmt(event.date)}`:""}{event.startTime?` · ${fmtTime(event.startTime)}`:""}{event.guests?` · ${event.guests} guests`:""}</div>
-              <div className="perdish-own-timestamp print-timestamp">Printed: {new Date().toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric",year:"numeric"})} at {new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"})}</div>
-            </div>
-          </div>
-          {event.notes?.trim()&&(
-            <div className="print-notes-box">
-              <div className="print-notes-lbl">EVENT NOTES &amp; ALERTS — VISIBLE TO ALL STAFF</div>
-              <div className="print-notes-txt">{event.notes}</div>
-            </div>
-          )}
-          <div className="perdish-section-title">Ingredient Quantities Per Dish</div>
-          <div className="perdish-grid">
-            {(event.menuSelections||[]).map(({key,qty,notes,ingNotes})=>{
-              const recipe=RECIPES[key]; if(!recipe)return null;
-              const ings=recipe.ingredients.filter(i=>ING[i.name]).map(i=>{
-                const cfg=ING[i.name];
-                const amount="ea" in i?Math.ceil(i.ea*qty):Math.ceil((i.oz||0)*qty/cfg.opU);
-                return{name:i.name,qty:amount,unit:cfg.unit,container:cfg.container||"",note:(ingNotes||{})[i.name]||""};
-              });
+          <div>
+            <div className="text-[10px] font-bold tracking-[.15em] uppercase text-muted mb-3">Jump to category</div>
+            {nonEmptyGroups.map(g=>{
+              const items=bygroup[g];
+              const grpPrepped=items.filter(x=>x.prepped?.trim()).length;
+              const grpPct=items.length>0?Math.round(grpPrepped/items.length*100):0;
               return(
-                <div key={key} className="perdish-dish">
-                  <div className="perdish-dish-hdr" style={{background:RCAT_COLORS[recipe.cat]||"#374151"}}>
-                    <span className="perdish-dish-name">{recipe.label}</span>
-                    <span className="perdish-dish-qty">{qty} {recipe.servingWord}{qty!==1?"s":""}</span>
-                  </div>
-                  {notes?.trim()&&(
-                    <div style={{fontSize:9,padding:"3px 9px",background:"#FFFBEB",borderBottom:"1px solid #F0B429",fontStyle:"italic",color:"#92400E"}}>
-                      {notes}
-                    </div>
-                  )}
-                  <table className="perdish-tbl">
-                    <thead><tr>
-                      <th className="pd-name">Ingredient</th>
-                      <th className="pd-qty">Qty</th>
-                      <th className="pd-unit">Unit</th>
-                      <th className="pd-cont">Container</th>
-                      <th className="pd-note">Notes</th>
-                    </tr></thead>
-                    <tbody>
-                      {ings.map(i=>(
-                        <tr key={i.name}>
-                          <td className="pd-name">{i.name}</td>
-                          <td className="pd-qty">{i.qty}</td>
-                          <td className="pd-unit">{i.unit}</td>
-                          <td className="pd-cont">{i.container||"—"}</td>
-                          <td className="pd-note">{i.note||""}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                <div key={g} className={`px-3 py-2 -mx-3 rounded-lg cursor-pointer flex flex-wrap items-center justify-between hover:bg-black/5 transition-colors ${activeGroup===g?"bg-black/5":""}`} onClick={()=>{setActiveGroup(g);scrollToGroup(g);}}>
+                  <span className="text-[13px] font-semibold text-carbon-300">{GROUPS[g].label}</span>
+                  <span className="text-[11px] font-semibold text-carbon-50">{grpPrepped}/{items.length}</span>
+                  <div className="w-full h-1 bg-carbon-08 rounded-full overflow-hidden mt-1.5"><div className="h-full rounded-full transition-all" style={{width:`${grpPct}%`,background:sc.bar}}/></div>
                 </div>
               );
             })}
           </div>
+          <div className="flex flex-col gap-2">
+            <button className="w-full px-3.5 py-2.5 rounded-lg text-[13px] font-bold cursor-pointer transition-colors border border-[#D4CCC2] bg-transparent text-carbon-300 hover:bg-black/5" onClick={()=>setShowDrawer(true)}>Add Item</button>
+            <button className="w-full px-3.5 py-2.5 rounded-lg text-[13px] font-bold cursor-pointer transition-colors border border-[#D4CCC2] bg-transparent text-carbon-300 hover:bg-black/5" onClick={onEditMenu}>Edit Menu</button>
+            <button className="w-full px-3.5 py-2.5 rounded-lg text-[13px] font-bold cursor-pointer transition-colors border border-[#D4CCC2] bg-transparent text-carbon-300 hover:bg-black/5" onClick={onEdit}>Edit Event</button>
+            <button className="w-full px-3.5 py-2.5 rounded-lg text-[13px] font-bold cursor-pointer transition-colors border border-[#D4CCC2] bg-transparent text-carbon-300 hover:bg-black/5" onClick={onPrint}>Print</button>
+            <button className="w-full px-3.5 py-2.5 rounded-lg border-[1.5px] border-red bg-red-bg text-red text-xs font-bold cursor-pointer flex items-center justify-center hover:bg-red hover:text-white transition-colors" onClick={onDelete}>Delete Event</button>
+          </div>
+        </aside>
+        
+        {/* Toggle Button */}
+        <button 
+          className="rail-btn absolute top-6 z-[101] w-6 h-6 rounded-full bg-white border border-bd shadow-sm flex items-center justify-center text-carbon-200 hover:bg-carbon-08 transition-colors text-xs" 
+          style={{ left: railCollapsed ? 0 : 280 - 12, marginTop: railCollapsed ? '40px' : '0' }} 
+          onClick={()=>setRailCollapsed(!railCollapsed)} 
+          title={railCollapsed?"Expand panel":"Collapse panel"}
+        >
+          {railCollapsed ? '›' : '‹'}
+        </button>
+
+        {/* ── WORK AREA ── */}
+        <main className="ps-work bg-transparent overflow-y-auto p-6 pb-24">
+
+          {/* Header card */}
+          <div className="ps-hdr-card bg-card rounded-2xl border border-bd shadow-custom overflow-hidden flex flex-col mb-6">
+            <div className="h-2 w-full" style={{background:sc.bar}}/>
+            <div className="p-6 flex flex-col gap-6">
+              <div className="flex flex-wrap gap-6 items-start">
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs font-bold tracking-[.1em] uppercase mb-2" style={{color:sc.bar}}>{event.date?fmtShort(event.date):""}{daysUntil!==null?` · ${daysLabel}`:""}</div>
+                  <div className="text-4xl font-extrabold text-carbon-300 leading-[1.1] mb-2">{event.name}</div>
+                  <div className="text-[15px] font-semibold text-carbon-50">{event.truck}{event.guests?` · ${event.guests} guests`:""}{event.startTime?` · service at ${fmtTime(event.startTime)}`:""}</div>
+                </div>
+                <div className="flex flex-col gap-3 w-full sm:w-auto">
+                  <div className="grid grid-cols-3 gap-4">
+                    {[["Order Ready","orderReadyBy"],["Load Time","loadBy"],["Start Time","startTime"]].map(([lbl,key])=>(
+                      <div key={key}>
+                        <div className="text-[10px] font-extrabold tracking-widest text-muted uppercase mb-1.5">{lbl}</div>
+                        <TimeSmart value={event[key]||""} onChange={v=>onUpdate({[key]:v})}/>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="grid grid-cols-3 gap-4">
+                    {[["Loaded By","loadDriver","text"],["Return By","returnsDriver","text"]].map(([lbl,key])=>(
+                      <div key={key}>
+                        <div className="text-[10px] font-extrabold tracking-widest text-muted uppercase mb-1.5">{lbl}</div>
+                        <input className="w-full bg-transparent border-b border-bd pb-1.5 text-xs font-semibold text-carbon-300 placeholder-muted outline-none focus:border-accent" type="text" value={event[key]||""} onChange={e=>onUpdate({[key]:e.target.value})} placeholder="—"/>
+                      </div>
+                    ))}
+                    <div>
+                      <div className="text-[10px] font-extrabold tracking-widest text-muted uppercase mb-1.5">Created</div>
+                      <div className="text-xs font-semibold text-carbon-300 border-b border-carbon-08 pb-0.5 mt-0.5">
+                        {event.createdAt?new Date(event.createdAt).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}):"—"}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-[10px] font-extrabold tracking-widest text-muted uppercase mb-1.5">Created By</div>
+                      <div className="text-xs font-semibold text-carbon-300 border-b border-carbon-08 pb-0.5 mt-0.5">
+                        {event.createdBy?.name||"—"}
+                      </div>
+                    </div>
+                  </div>
+                  {event.updatedAt&&<div className="text-[10px] text-carbon-50 tracking-[.06em]">Last revised: {new Date(event.updatedAt).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})} at {new Date(event.updatedAt).toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"})}</div>}
+                </div>
+              </div>
+              <div className="flex gap-8 pt-6 border-t border-carbon-08">
+                {(()=>{
+                  const untilLabel=hoursUntil===null?"—":hoursUntil<=0?"Now":hoursUntil<24?`${hoursUntil}h`:`${Math.floor(hoursUntil/24)}d ${hoursUntil%24}h`;
+                  return[["Items",total],["Prepped",prepped],["Loaded",loaded],["Categories",nonEmptyGroups.length],["Until Service",untilLabel]].map(([l,v])=>(
+                    <div key={l} className="flex flex-col"><div className="text-[22px] font-extrabold text-carbon-300 leading-none mb-1">{v}</div><div className="text-[11px] font-bold text-carbon-50">{l}</div></div>
+                  ));
+                })()}
+              </div>
+            </div>
+          </div>
+
+          {/* Notes banner */}
+          <div className="ps-notes-banner bg-[#FFFBEB] border-2 border-[#F59E0B] rounded-2xl p-4 mb-6 shadow-sm">
+            <div className="text-[10px] font-extrabold text-[#B45309] uppercase tracking-widest mb-2 flex items-center gap-2 before:content-['!'] before:bg-[#FEF3C7] before:text-[#92400E] before:w-4 before:h-4 before:flex before:items-center before:justify-center before:rounded-full before:font-black">Event notes &amp; alerts · all staff read</div>
+            <textarea className="w-full bg-transparent border-none text-[13px] text-[#92400E] font-medium leading-relaxed outline-none resize-none placeholder-black/40" rows={3} value={event.notes||""} onChange={e=>onUpdate({notes:e.target.value})} placeholder="Add important notes here — allergies, special requests, client instructions…"/>
+          </div>
+
+          {/* Menu chips */}
+          {event.menuSelections?.length>0&&(
+            <div className="ps-menu-bar bg-white border border-bd rounded-xl p-3 px-4 mb-8 shadow-sm">
+              <div className="text-[10px] font-bold text-muted uppercase tracking-widest mb-2">Auto-calculated from menu</div>
+              <div className="flex flex-wrap gap-2 items-center">
+                {event.menuSelections.map(s=><span key={s.key} className="text-[11px] font-semibold text-carbon-300 bg-bg px-2 py-1 rounded-md border border-bd">{s.label||(RECIPES[s.key]?.label)||s.key}: {s.qty}</span>)}
+                <button className="text-[11px] font-semibold bg-transparent rounded-full px-2.5 py-0.5 cursor-pointer ml-1 hover:opacity-80 transition-opacity" style={{color:sc.bar,border:`1px solid ${sc.bar}`}} onClick={onEditMenu}>Edit menu →</button>
+              </div>
+            </div>
+          )}
+
+          {/* Category sections */}
+          {GROUP_ORDER.map((g,gIdx)=>{
+            const items=bygroup[g];if(!items.length)return null;
+            const open=!collapsed[g];
+            const grpPrepped=items.filter(x=>x.prepped?.trim()).length;
+            return(
+              <div key={g} className="mb-8" ref={el=>catRefs.current[g]=el}>
+                <div className="ps-cat-hdr flex items-center p-3 px-4 rounded-xl text-white cursor-pointer select-none mb-2 shadow-md" style={{background:sc.bar}} onClick={()=>setCollapsed(p=>({...p,[g]:!p[g]}))}>
+                  <span className="bg-black/20 text-white font-extrabold text-[11px] w-6 h-6 rounded-full flex items-center justify-center mr-3">{String(gIdx+1).padStart(2,"0")}</span>
+                  <span className="text-[15px] font-bold tracking-wide flex-1">{GROUPS[g].label}</span>
+                  <span className="text-xs font-semibold opacity-90 mr-4">{grpPrepped} of {items.length} prepped</span>
+                  <span className={`ps-cat-arr text-sm font-bold transition-transform opacity-70 ${open?"rotate-180":""}`}>▾</span>
+                </div>
+                {open&&(
+                  <div className="bg-white border border-bd rounded-xl overflow-hidden shadow-sm">
+                    <table className="w-full border-collapse">
+                      <thead><tr className="text-left text-[10px] font-extrabold tracking-[.1em] text-muted uppercase bg-bg">
+                        <th className="py-2.5 px-3 border-b border-bd">Ingredient</th>
+                        <th className="py-2.5 px-3 border-b border-bd">QTY</th>
+                        <th className="py-2.5 px-3 border-b border-bd">Unit</th>
+                        <th className="py-2.5 px-3 border-b border-bd w-[7%]">Container</th>
+                        <th className="py-2.5 px-3 border-b border-bd w-[32%]">Notes / Variation</th>
+                        <th className="py-2.5 px-3 border-b border-bd">Prepped</th>
+                        <th className="py-2.5 px-3 border-b border-bd">Loaded</th>
+                        <th className="py-2.5 px-3 border-b border-bd">Return…</th>
+                        <th className="py-2.5 px-3 border-b border-bd"></th>
+                      </tr></thead>
+                      <tbody>
+                        {items.map(item=>(
+                          <ItemRow key={item.id} item={item}
+                            onUpdate={(patch)=>onUpdateItem(item.id,patch)}
+                            onRemove={()=>onRemoveItem(item.id)}
+                          />
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+
+          {event.archived&&(
+            <div className="mt-12 pt-8 border-t border-bd">
+              <div className="text-lg font-extrabold text-carbon-300 mb-4">Post-Event Notes</div>
+              <textarea className="w-full p-4 rounded-xl border border-bd bg-white text-[13px] outline-none focus:border-accent resize-none" rows={4} value={event.postNotes||""} onChange={e=>onUpdate({postNotes:e.target.value})} placeholder="How did it go? Notes for next time…"/>
+            </div>
+          )}
+        </main>
+      </div>
+
+      {/* ── PRINT UI: MAIN PREP SHEET ── */}
+      {(printMode === "prep" || printMode === "both") && (
+      <div className="prep-print-only hidden">
+        <div className="text-right text-[9px] text-[#A39991] uppercase tracking-widest font-bold mb-2">
+          Printed: {new Date().toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric",year:"numeric"})} at {new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"})}
+        </div>
+        <div className="print-header">
+          <div className="flex items-center gap-4">
+            <div className="w-[30px] h-[30px] rounded-full bg-[#1A1714] shrink-0"/>
+            <div>
+              <div className="text-[16px] font-extrabold tracking-widest leading-none text-[#1A1714]">BORDER GRILL</div>
+              <div className="text-[9px] font-bold tracking-widest text-[#54453A] mt-1">TRUCK + CATERING · PREP SHEET</div>
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="text-xl font-extrabold text-[#1A1714] leading-tight mb-1">{event.name}</div>
+            <div className="text-xs text-[#54453A] font-semibold">{event.truck}{event.date?` · ${fmt(event.date)}`:""}{event.startTime?` · ${fmtTime(event.startTime)}`:""}{event.guests?` · ${event.guests} guests`:""}</div>
+          </div>
         </div>
 
-      </main>
+        <div className="grid grid-cols-6 gap-0 border border-[#E6E1DC] overflow-hidden mb-4 bg-[#FBF9F8]">
+          {[
+            ["ORDER READY BY", event.orderReadyBy?fmtTime(event.orderReadyBy):""],
+            ["LOAD BY",        event.loadBy?fmtTime(event.loadBy):""],
+            ["REVISED ON",     event.updatedAt?new Date(event.updatedAt).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}):""],
+            ["KITCHEN MGR",    event.kitchenManager||""],
+            ["LOAD DRIVER",    event.loadDriver||""],
+            ["RETURNS DRIVER", event.returnsDriver||""],
+          ].map(([lbl,val])=>(
+            <div key={lbl} className="p-2.5 px-3 border-r border-[#E6E1DC] last:border-r-0">
+              <div className="text-[8px] font-extrabold tracking-widest text-[#A39991] uppercase mb-1">{lbl}</div>
+              <div className="text-xs font-bold text-[#1A1714]">{val}</div>
+            </div>
+          ))}
+        </div>
+
+        {event.notes?.trim()&&(
+          <div className="border border-[#D97706] bg-[#FFFBEB] p-3 rounded-xl mb-6">
+            <div className="text-[9px] font-extrabold tracking-widest text-[#B45309] uppercase mb-1">EVENT NOTES &amp; ALERTS — VISIBLE TO ALL STAFF</div>
+            <div className="text-xs text-[#92400E] font-medium leading-relaxed">{event.notes}</div>
+          </div>
+        )}
+
+        {/* PRINT CATEGORY SECTIONS */}
+        {GROUP_ORDER.map(g=>{
+          const items=bygroup[g]; if(!items.length)return null;
+          return (
+            <div key={g} className="mb-6 break-inside-avoid">
+              <div className="flex justify-between items-center px-4 py-2 text-white font-extrabold text-[13px] uppercase tracking-widest" style={{background: sc.bar}}>
+                <span>{GROUPS[g].label}</span>
+                <span className="text-[11px] opacity-90">{items.length} items</span>
+              </div>
+              <table className="w-full border-collapse text-[10px]">
+                <thead>
+                  <tr className="text-left font-extrabold tracking-[.1em] text-[#A39991] uppercase bg-[#FBF9F8] border-b border-[#E6E1DC]">
+                    <th className="p-1">ITEM</th>
+                    <th className="p-1 text-center">QTY</th>
+                    <th className="p-1 text-center">UNIT</th>
+                    <th className="p-1 w-[10%] text-center">CONTAINER</th>
+                    <th className="p-1 w-[32%]">NOTES / VARIATION</th>
+                    <th className="p-1 text-center">PREPPED</th>
+                    <th className="p-1 text-center">LOADED</th>
+                    <th className="p-1 text-center">RETURN...</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {items.map(item=>(
+                    <tr key={item.id} className="border-b border-[#E6E1DC] text-[#1A1714]">
+                      <td className="p-1 font-bold text-[11px]">
+                        {item.name}
+                        {item.variation&&<div className="italic text-[#54453A] text-[9px] font-normal mt-0.5">{item.variation}</div>}
+                      </td>
+                      <td className="p-1 text-center font-extrabold text-[11px]">{item.quantity||" "}</td>
+                      <td className="p-1 text-center text-[#54453A] font-bold">{item.unit||" "}</td>
+                      <td className="p-1 text-center text-[#54453A] font-bold">{item.container||" "}</td>
+                      <td className="p-1 italic text-[#54453A] font-bold">{item.notes||" "}</td>
+                      <td className="p-1 text-center italic text-[#A39991] text-[9px]">{item.prepped?.trim()?item.prepped:"initials"}</td>
+                      <td className="p-1 text-center italic text-[#A39991] text-[9px]">{item.loaded?.trim()?item.loaded:"qty"}</td>
+                      <td className="p-1 text-center italic text-[#A39991] text-[9px]">{item.returned?.trim()?item.returned:"qty"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )
+        })}
+
+        <div className="flex justify-between mt-12 gap-8 break-inside-avoid">
+          {[["Kitchen Manager","kitchenManager"],["Load Driver","loadDriver"],["Returns Driver","returnsDriver"]].map(([lbl,key])=>(
+            <div key={key} className="flex-1">
+              <div className="text-[11px] font-bold text-[#1A1714] mb-5">{lbl}</div>
+              <div className="border-b border-[#1A1714]"/>
+            </div>
+          ))}
+        </div>
+      </div>
+      )}
+
+      {/* ── PRINT UI: PER DISH BREAKDOWN ── */}
+      {(printMode === "perdish" || printMode === "both") && (
+      <div className="perdish-print hidden">
+        <div className="text-right text-[9px] text-[#A39991] uppercase tracking-widest font-bold mb-2">
+          Printed: {new Date().toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric",year:"numeric"})} at {new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"})}
+        </div>
+        <div className="print-header">
+          <div className="flex items-center gap-4">
+            <div className="w-[30px] h-[30px] rounded-full bg-[#1A1714] shrink-0"/>
+            <div>
+              <div className="text-[16px] font-extrabold tracking-widest leading-none text-[#1A1714]">BORDER GRILL</div>
+              <div className="text-[9px] font-bold tracking-widest text-[#54453A] mt-1">TRUCK + CATERING · PER DISH BREAKDOWN</div>
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="text-xl font-extrabold text-[#1A1714] leading-tight mb-1">{event.name}</div>
+            <div className="text-xs text-[#54453A] font-semibold">{event.truck}{event.date?` · ${fmt(event.date)}`:""}{event.startTime?` · ${fmtTime(event.startTime)}`:""}{event.guests?` · ${event.guests} guests`:""}</div>
+          </div>
+        </div>
+        {event.notes?.trim()&&(
+          <div className="border border-[#D97706] bg-[#FFFBEB] p-3 rounded-xl mb-4">
+            <div className="text-[9px] font-extrabold tracking-widest text-[#B45309] uppercase mb-1">EVENT NOTES &amp; ALERTS — VISIBLE TO ALL STAFF</div>
+            <div className="text-xs text-[#92400E] font-medium leading-relaxed">{event.notes}</div>
+          </div>
+        )}
+        <div className="text-sm font-extrabold uppercase tracking-widest text-[#1A1714] border-b border-[#1A1714] pb-2 mb-4 mt-6">Ingredient Quantities Per Dish</div>
+        <div className="grid grid-cols-1 gap-4">
+          {(event.menuSelections||[]).map(({key,qty,notes,ingNotes})=>{
+            const recipe=RECIPES[key]; if(!recipe)return null;
+            const ings=recipe.ingredients.filter(i=>ING[i.name]).map(i=>{
+              const cfg=ING[i.name];
+              const amount="ea" in i?Math.ceil(i.ea*qty):Math.ceil((i.oz||0)*qty/cfg.opU);
+              return{name:i.name,qty:amount,unit:cfg.unit,container:cfg.container||"",note:(ingNotes||{})[i.name]||""};
+            });
+            return(
+              <div key={key} className="border border-[#D4CCC2] rounded-lg overflow-hidden flex flex-col mb-4 break-inside-avoid">
+                <div className="flex justify-between items-center px-3 py-2 text-white" style={{background:RCAT_COLORS[recipe.cat]||"#374151"}}>
+                  <span className="text-[13px] font-bold leading-tight">{recipe.label}</span>
+                  <span className="text-[11px] font-extrabold opacity-90 tracking-wide uppercase bg-black/20 px-2 py-0.5 rounded-full">{qty} {recipe.servingWord}{qty!==1?"s":""}</span>
+                </div>
+                {notes?.trim()&&(
+                  <div className="text-[9px] py-1 px-2.5 bg-[#FFFBEB] border-b border-[#F0B429] italic text-[#92400E]">
+                    {notes}
+                  </div>
+                )}
+                <table className="w-full border-collapse text-[10px]">
+                  <thead><tr>
+                    <th className="text-left text-[9px] font-extrabold tracking-[.1em] text-[#A39991] uppercase p-1 border-b border-[#E6E1DC]">INGREDIENT</th>
+                    <th className="text-center text-[9px] font-extrabold tracking-[.1em] text-[#A39991] uppercase p-1 border-b border-[#E6E1DC]">QTY</th>
+                    <th className="text-center text-[9px] font-extrabold tracking-[.1em] text-[#A39991] uppercase p-1 border-b border-[#E6E1DC]">UNIT</th>
+                    <th className="text-left text-[9px] font-extrabold tracking-[.1em] text-[#A39991] uppercase p-1 border-b border-[#E6E1DC]">CONTAINER</th>
+                    <th className="text-left text-[9px] font-extrabold tracking-[.1em] text-[#A39991] uppercase p-1 border-b border-[#E6E1DC]">NOTES</th>
+                  </tr></thead>
+                  <tbody>
+                    {ings.map(i=>(
+                      <tr key={i.name}>
+                        <td className="text-left font-bold text-[#1A1714] p-1 border-b border-[#E6E1DC]">{i.name}</td>
+                        <td className="text-center font-bold text-[#1A1714] p-1 border-b border-[#E6E1DC]">{i.qty}</td>
+                        <td className="text-center text-[#54453A] p-1 border-b border-[#E6E1DC]">{i.unit}</td>
+                        <td className="text-left text-[#54453A] p-1 border-b border-[#E6E1DC]">{i.container||"—"}</td>
+                        <td className="text-left italic text-[#54453A] p-1 border-b border-[#E6E1DC]">{i.note||""}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      )}
 
       {showDrawer&&<ManualDrawer event={event} ING={ING} onClose={()=>setShowDrawer(false)} onAdd={items=>{onAddItems(items);setShowDrawer(false);}}/>}
-    </div>
+    </>
   );
 }
